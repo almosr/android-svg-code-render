@@ -1,12 +1,19 @@
 package android.graphics;
 
+import android_svg_code_render.AndroidClass;
+import android_svg_code_render.Initializer;
+import android_svg_code_render.OutputBuilder;
+
 /**
  * Created by racs on 2015.03.17..
  */
-public class Paint {
+public class Paint implements AndroidClass {
     public static final int ANTI_ALIAS_FLAG = 1;
     public static final int DEV_KERN_TEXT_FLAG = 2;
-    public static final int SUBPIXEL_TEXT_FLAG = 3;
+    public static final int SUBPIXEL_TEXT_FLAG = 4;
+
+    private static int[] flagValues = {ANTI_ALIAS_FLAG, DEV_KERN_TEXT_FLAG, SUBPIXEL_TEXT_FLAG};
+    private static String[] flagNames = {"ANTI_ALIAS_FLAG", "DEV_KERN_TEXT_FLAG", "SUBPIXEL_TEXT_FLAG"};
     private float mTextSize;
     private Shader mShader;
     private float mStrokeWidth;
@@ -19,19 +26,24 @@ public class Paint {
     private Typeface mTypeface;
     private int mColor;
 
-    public Paint(Paint fillPaint) {
-        throw new RuntimeException("Dummy function");
+    private String mInstanceName;
+
+    public Paint(Paint paint) {
+        Initializer.init(this, paint.getInstanceName());
     }
 
     public Paint() {
+        Initializer.init(this);
     }
 
     public void setFlags(int flags) {
-        throw new RuntimeException("Dummy function");
+        String flagString = OutputBuilder.splitFlags(flags, "Paint.", flagValues, flagNames);
+        OutputBuilder.appendMethodCall(this, "setFlags", "%s", flagString);
     }
 
     public void setStyle(Style style) {
-        throw new RuntimeException("Dummy function");
+        OutputBuilder.addImport(Paint.class);
+        OutputBuilder.appendMethodCall(this, "setStyle", "Paint.Style.%s", style.name());
     }
 
     public void setTypeface(int typeface) {
@@ -111,7 +123,8 @@ public class Paint {
     }
 
     public void setTypeface(Typeface typeface) {
-        mTypeface = typeface;
+        OutputBuilder.addImport(Typeface.class);
+        OutputBuilder.appendMethodCall(this, "setTypeface", "%s", typeface.getInstanceName());
     }
 
     public int getColor() {
@@ -124,6 +137,16 @@ public class Paint {
 
     public void getTextPath(String text, int start, int end, float x, float y, Path path) {
         throw new RuntimeException("Dummy function");
+    }
+
+    @Override
+    public String getInstanceName() {
+        return mInstanceName;
+    }
+
+    @Override
+    public void setInstanceName(String instanceName) {
+        mInstanceName = instanceName;
     }
 
     public enum Style {

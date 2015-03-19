@@ -1,15 +1,22 @@
 package android.graphics;
 
+import android_svg_code_render.AndroidClass;
+import android_svg_code_render.Initializer;
+
 /**
  * Created by racs on 2015.03.17..
  */
-public class RectF {
+public class RectF implements AndroidClass {
     public float left;
     public float top;
     public float right;
     public float bottom;
 
+    private String mInstanceName;
+
     public RectF(float left, float top, float right, float bottom) {
+        this();
+
         this.left = left;
         this.right = right;
         this.top = top;
@@ -17,6 +24,7 @@ public class RectF {
     }
 
     public RectF() {
+        Initializer.init(this);
     }
 
     public RectF(Rect rect) {
@@ -37,5 +45,15 @@ public class RectF {
 
     public void union(RectF bounds) {
         throw new RuntimeException("Dummy function");
+    }
+
+    @Override
+    public String getInstanceName() {
+        return mInstanceName;
+    }
+
+    @Override
+    public void setInstanceName(String instanceName) {
+        mInstanceName = instanceName;
     }
 }

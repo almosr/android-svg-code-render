@@ -1,5 +1,10 @@
 package android_svg_code_render;
 
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import com.caverock.androidsvg.SVG;
+import com.caverock.androidsvg.SVGParseException;
+
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -23,7 +28,7 @@ public class Main {
 
         try {
             render(inputFileName);
-        } catch (IOException | RuntimeException e) {
+        } catch (IOException | SVGParseException | RuntimeException e) {
             error(e, "Error while rendering SVG file: %s", inputFileName);
         }
 
@@ -34,10 +39,12 @@ public class Main {
         }
     }
 
-    private static void render(String inputFileName) throws IOException {
+    private static void render(String inputFileName) throws IOException, SVGParseException {
         FileInputStream is = new FileInputStream(inputFileName);
 
-        //TODO: parsing
+        SVG svg = SVG.getFromInputStream(is);
+        Bitmap bitmap = Bitmap.createBitmap(100, 200, Bitmap.Config.ARGB_8888);
+        svg.renderToCanvas(new Canvas(bitmap));
 
         is.close();
     }
@@ -59,11 +66,10 @@ public class Main {
     public static void error(Exception e, String msg, Object... params) {
         String error = "";
         if (e != null) {
-            e.printStackTrace();
             String.format(": %s - %s", e.getClass().getName(), e.getMessage());
         }
         System.out.format("%s%s\n", String.format(msg, params), error);
 
-        System.exit(-1);
+        throw new RuntimeException(e);
     }
 }

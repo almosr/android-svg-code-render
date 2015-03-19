@@ -597,6 +597,12 @@ public class SVGParser extends DefaultHandler2
 
       // Invoke the SAX XML parser on the input.
       SAXParserFactory  spf = SAXParserFactory.newInstance();
+
+       //### Added for android_svg_code_render
+       //Java SAX implementation requires namespace aware setting to be turned on
+       spf.setNamespaceAware(true);
+       //### EOB
+
       try
       {
          SAXParser sp = spf.newSAXParser();

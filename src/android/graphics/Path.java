@@ -1,13 +1,23 @@
 package android.graphics;
 
+import android_svg_code_render.AndroidClass;
+import android_svg_code_render.Initializer;
+import android_svg_code_render.OutputBuilder;
+
 /**
  * Created by racs on 2015.03.17..
  */
-public class Path {
+public class Path implements AndroidClass {
+
+    private String mInstanceName;
     private Path.FillType mFillType;
 
+    public Path() {
+        Initializer.init(this);
+    }
+
     public void transform(Matrix currentMatrix, Path transformedPath) {
-        throw new RuntimeException("Dummy function");
+        OutputBuilder.appendMethodCall(this, "transform", "%s, %s", currentMatrix.getInstanceName(), transformedPath.getInstanceName());
     }
 
     public Path.FillType getFillType() {
@@ -16,10 +26,11 @@ public class Path {
 
     public void setFillType(Path.FillType fillType) {
         mFillType = fillType;
+        OutputBuilder.appendMethodCall(this, "setFillType", "Path.%s", fillType.name());
     }
 
     public void computeBounds(RectF bounds, boolean exact) {
-        throw new RuntimeException("Dummy function");
+        OutputBuilder.appendMethodCall(this, "computeBounds", "%s, %b", bounds.getInstanceName(), exact);
     }
 
     public void transform(Matrix transform) {
@@ -27,31 +38,41 @@ public class Path {
     }
 
     public void moveTo(float x, float y) {
-        throw new RuntimeException("Dummy function");
+        OutputBuilder.appendMethodCall(this, "moveTo", "%f, %f", x, y);
     }
 
     public void lineTo(float x, float y) {
-        throw new RuntimeException("Dummy function");
+        OutputBuilder.appendMethodCall(this, "lineTo", "%f, %f", x, y);
     }
 
     public void cubicTo(float x1, float y1, float x2, float y2, float x3, float y3) {
-        throw new RuntimeException("Dummy function");
+        OutputBuilder.appendMethodCall(this, "cubicTo", "%f, %f, %f, %f, %f, %f, %f", x1, y1, x2, y2, x3, y3);
     }
 
     public void quadTo(float x1, float y1, float x2, float y2) {
-        throw new RuntimeException("Dummy function");
+        OutputBuilder.appendMethodCall(this, "quadTo", "%f, %f, %f, %f, %f", x1, y1, x2, y2);
     }
 
     public void close() {
-        throw new RuntimeException("Dummy function");
+        OutputBuilder.appendMethodCall(this, "close");
     }
 
     public void addPath(Path path, Matrix matrix) {
-        throw new RuntimeException("Dummy function");
+        OutputBuilder.appendMethodCall(this, "addPath", "%s, %s", path.getInstanceName(), matrix.getInstanceName());
     }
 
     public void addPath(Path src) {
-        throw new RuntimeException("Dummy function");
+        OutputBuilder.appendMethodCall(this, "addPath", "%s", src.getInstanceName());
+    }
+
+    @Override
+    public String getInstanceName() {
+        return mInstanceName;
+    }
+
+    @Override
+    public void setInstanceName(String instanceName) {
+        mInstanceName = instanceName;
     }
 
     public enum FillType {EVEN_ODD, WINDING}
