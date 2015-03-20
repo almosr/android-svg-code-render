@@ -9,6 +9,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.Locale;
 
 /**
  * Created by racs on 2015.03.17..
@@ -22,6 +23,9 @@ public class Main {
         }
 
         OutputBuilder.init();
+
+        //Let's set the US locale to avoid problems with number format
+        Locale.setDefault(Locale.US);
 
         String inputFileName = args[0];
         String outFileName = args[1];
