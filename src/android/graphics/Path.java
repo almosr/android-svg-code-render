@@ -38,19 +38,19 @@ public class Path implements AndroidClass {
     }
 
     public void moveTo(float x, float y) {
-        OutputBuilder.appendMethodCall(this, "moveTo", "%f, %f", x, y);
+        OutputBuilder.appendMethodCall(this, "moveTo", "%ff, %ff", x, y);
     }
 
     public void lineTo(float x, float y) {
-        OutputBuilder.appendMethodCall(this, "lineTo", "%f, %f", x, y);
+        OutputBuilder.appendMethodCall(this, "lineTo", "%ff, %ff", x, y);
     }
 
     public void cubicTo(float x1, float y1, float x2, float y2, float x3, float y3) {
-        OutputBuilder.appendMethodCall(this, "cubicTo", "%f, %f, %f, %f, %f, %f, %f", x1, y1, x2, y2, x3, y3);
+        OutputBuilder.appendMethodCall(this, "cubicTo", "%ff, %ff, %ff, %ff, %ff, %ff, %ff", x1, y1, x2, y2, x3, y3);
     }
 
     public void quadTo(float x1, float y1, float x2, float y2) {
-        OutputBuilder.appendMethodCall(this, "quadTo", "%f, %f, %f, %f, %f", x1, y1, x2, y2);
+        OutputBuilder.appendMethodCall(this, "quadTo", "%ff, %ff, %ff, %ff, %ff", x1, y1, x2, y2);
     }
 
     public void close() {

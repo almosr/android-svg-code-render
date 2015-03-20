@@ -42,11 +42,11 @@ public class Matrix implements AndroidClass {
     }
 
     public void preTranslate(float x, float y) {
-        OutputBuilder.appendMethodCall(this, "preTranslate", "%f, %f", x, y);
+        OutputBuilder.appendMethodCall(this, "preTranslate", "%ff, %ff", x, y);
     }
 
     public void preScale(float xScale, float yScale) {
-        OutputBuilder.appendMethodCall(this, "preScale", "%f, %f", xScale, yScale);
+        OutputBuilder.appendMethodCall(this, "preScale", "%ff, %ff", xScale, yScale);
     }
 
     public void postScale(float rx, float ry) {

@@ -60,7 +60,7 @@ public class Canvas implements AndroidClass {
     }
 
     public void translate(float x, float y) {
-        OutputBuilder.appendMethodCall(this, "translate", "%f, %f", x, y);
+        OutputBuilder.appendMethodCall(this, "translate", "%ff, %ff", x, y);
 
     }
 
@@ -69,19 +69,19 @@ public class Canvas implements AndroidClass {
     }
 
     public void drawBitmap(Bitmap maskedContent, float left, float top, Paint paint) {
-        OutputBuilder.appendMethodCall(this, "drawBitmap", "%f, %f, %s", left, top, paint.getInstanceName());
+        OutputBuilder.appendMethodCall(this, "drawBitmap", "%ff, %ff, %s", left, top, paint.getInstanceName());
     }
 
     public void drawText(String text, float x, float y, Paint paint) {
-        OutputBuilder.appendMethodCall(this, "drawText", "\"%s\", %f, %f, %s", text, x, y, paint.getInstanceName());
+        OutputBuilder.appendMethodCall(this, "drawText", "\"%s\", %ff, %ff, %s", text, x, y, paint.getInstanceName());
     }
 
     public void drawTextOnPath(String text, Path path, float x, float y, Paint paint) {
-        OutputBuilder.appendMethodCall(this, "drawTextOnPath", "\"%s\", %s, %f, %f, %s", text, paint.getInstanceName(), x, y, paint.getInstanceName());
+        OutputBuilder.appendMethodCall(this, "drawTextOnPath", "\"%s\", %s, %ff, %ff, %s", text, paint.getInstanceName(), x, y, paint.getInstanceName());
     }
 
     public void clipRect(float left, float top, float right, float bottom) {
-        OutputBuilder.appendMethodCall(this, "clipRect", "%f, %f, %f, %f", left, top, right, bottom);
+        OutputBuilder.appendMethodCall(this, "clipRect", "%ff, %ff, %ff, %ff", left, top, right, bottom);
     }
 
     public void drawColor(int color) {
@@ -97,7 +97,7 @@ public class Canvas implements AndroidClass {
     }
 
     public void scale(float width, float height) {
-        OutputBuilder.appendMethodCall(this, "scale", "%f, %f", width, height);
+        OutputBuilder.appendMethodCall(this, "scale", "%ff, %ff", width, height);
     }
 
     @Override

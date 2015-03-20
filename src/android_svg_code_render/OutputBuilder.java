@@ -79,7 +79,7 @@ public class OutputBuilder {
     }
 
     public static String createArrayParameter(float[] array) {
-        return String.format("new float[] %s", Arrays.toString(array).replace("[", "{").replace("]", "}"));
+        return String.format("new float[] %s", Arrays.toString(array).replace("[", "{").replace("]", "f}").replace(",","f,"));
     }
 
     public static String createArrayParameter(int[] array) {

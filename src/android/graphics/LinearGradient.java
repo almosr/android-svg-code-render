@@ -9,7 +9,7 @@ import android_svg_code_render.OutputBuilder;
 public class LinearGradient extends Shader {
 
     public LinearGradient(float x1, float y1, float x2, float y2, int[] colours, float[] positions, Shader.TileMode tileMode) {
-        Initializer.init(this, String.format("%f, %f, %f, %f, %s, %s, %s",
+        Initializer.init(this, String.format("%ff, %ff, %ff, %ff, %s, %s, %s",
                 x1, y1, x2, y2,
                 OutputBuilder.createArrayParameter(colours),
                 OutputBuilder.createArrayParameter(positions),
