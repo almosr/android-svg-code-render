@@ -47,27 +47,31 @@ public class Main {
     private static void extractParameters(String[] args) {
         //TODO: proper parsing of the command line parameters
 
-        if (args.length < 2 || args.length > 5) {
+        if (args.length < 1 || args.length > 5) {
             printHelp();
             error("Wrong arguments");
         }
 
         sInputFileName = args[0];
-        sOutFileName = args[1];
 
         sPackageName = "svgrenderpackage";
-        if (args.length > 2) {
-            sPackageName = args[2];
+        if (args.length > 1) {
+            sPackageName = args[1];
         }
 
         sClassName = "SvgRenderClass_" + sInputFileName.split(".svg")[0];
-        if (args.length > 3) {
-            sClassName = args[3];
+        if (args.length > 2) {
+            sClassName = args[2];
         }
 
         sMethodName = "render";
+        if (args.length > 3) {
+            sMethodName = args[3];
+        }
+
+        sOutFileName = sClassName + ".java";
         if (args.length > 4) {
-            sMethodName = args[4];
+            sOutFileName = args[4];
         }
     }
 
@@ -88,7 +92,7 @@ public class Main {
     }
 
     private static void printHelp() {
-        System.out.println("Usage: android-svg-code-render <inputfile.svg> <outputfile.java>\n");
+        System.out.println("Usage: android-svg-code-render inputfile.svg <package name> <class name> <method name> <outputfile.java>\n");
     }
 
     public static void error(String msg, Object... params) {
