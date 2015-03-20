@@ -87,6 +87,6 @@ public class OutputBuilder {
     }
 
     public static void addImport(Class clazz) {
-        imports.add(clazz.getName());
+        imports.add(clazz.getName().replace("$","."));
     }
 }

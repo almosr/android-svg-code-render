@@ -17,6 +17,8 @@ public class Bitmap implements AndroidClass {
         mWidth = width;
         mHeight = height;
 
+        OutputBuilder.addImport(Bitmap.class);
+        OutputBuilder.addImport(Config.class);
         mInstanceName = Initializer.generateInstanceName(Bitmap.class);
     }
 
