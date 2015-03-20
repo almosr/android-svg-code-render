@@ -26,7 +26,7 @@ public class Path implements AndroidClass {
 
     public void setFillType(Path.FillType fillType) {
         mFillType = fillType;
-        OutputBuilder.appendMethodCall(this, "setFillType", "Path.%s", fillType.name());
+        OutputBuilder.appendMethodCall(this, "setFillType", "Path.FillType.%s", fillType.name());
     }
 
     public void computeBounds(RectF bounds, boolean exact) {
