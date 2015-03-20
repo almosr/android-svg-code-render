@@ -16,30 +16,58 @@ import java.util.Locale;
  */
 public class Main {
 
+    private static String sInputFileName;
+    private static String sOutFileName;
+    private static String sPackageName;
+    private static String sClassName;
+    private static String sMethodName;
+
     public static void main(String[] args) {
-        if (args.length != 2) {
-            printHelp();
-            return;
-        }
 
         OutputBuilder.init();
 
         //Let's set the US locale to avoid problems with number format
         Locale.setDefault(Locale.US);
 
-        String inputFileName = args[0];
-        String outFileName = args[1];
+        extractParameters(args);
 
         try {
-            render(inputFileName);
+            render(sInputFileName);
         } catch (IOException | SVGParseException | RuntimeException e) {
-            error(e, "Error while rendering SVG file: %s", inputFileName);
+            error(e, "Error while rendering SVG file: %s", sInputFileName);
         }
 
         try {
-            saveOutput(outFileName, OutputBuilder.getResult());
+            saveOutput(sOutFileName, OutputBuilder.getResult(sInputFileName, sPackageName, sClassName, sMethodName));
         } catch (FileNotFoundException e) {
             error(e, "Error while saving result");
+        }
+    }
+
+    private static void extractParameters(String[] args) {
+        //TODO: proper parsing of the command line parameters
+
+        if (args.length < 2 || args.length > 5) {
+            printHelp();
+            error("Wrong arguments");
+        }
+
+        sInputFileName = args[0];
+        sOutFileName = args[1];
+
+        sPackageName = "svgrenderpackage";
+        if (args.length > 2) {
+            sPackageName = args[2];
+        }
+
+        sClassName = "SvgRenderClass_" + sInputFileName.split(".svg")[0];
+        if (args.length > 3) {
+            sClassName = args[3];
+        }
+
+        sMethodName = "render";
+        if (args.length > 4) {
+            sMethodName = args[4];
         }
     }
 
@@ -70,10 +98,14 @@ public class Main {
     public static void error(Exception e, String msg, Object... params) {
         String error = "";
         if (e != null) {
-            String.format(": %s - %s", e.getClass().getName(), e.getMessage());
+            error = String.format(": %s - %s", e.getClass().getName(), e.getMessage());
         }
         System.out.format("%s%s\n", String.format(msg, params), error);
 
-        throw new RuntimeException(e);
+        if (e != null) {
+            throw new RuntimeException(e);
+        } else {
+            System.exit(1);
+        }
     }
 }

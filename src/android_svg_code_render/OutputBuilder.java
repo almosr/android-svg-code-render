@@ -1,9 +1,6 @@
 package android_svg_code_render;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.SortedSet;
-import java.util.TreeSet;
+import java.util.*;
 
 /**
  * Created by racs on 2015.03.17..
@@ -16,8 +13,23 @@ public class OutputBuilder {
         output = new StringBuilder();
     }
 
-    public static String getResult() {
+    public static String getResult(String fileName, String packageName, String className, String methodName) {
         StringBuilder str = new StringBuilder();
+
+        str.append(String.format("package %s;\n\n", packageName));
+
+        str.append("/**\n");
+        str.append(" * Converted SVG file into Java code\n");
+        str.append(String.format(" * Original file name: %s\n", fileName));
+        str.append(String.format(" * Conversion date: %s\n", new Date().toString()));
+        str.append(" *\n");
+        str.append(" * Converted by android-svg-code-render\n");
+        str.append(" * https://github.com/racsdragon/android-svg-code-render\n");
+        str.append(" **/\n\n");
+
+        //In case it is not imported yet, although it is unlikely:
+        //we need the Canvas class as a parameter for the render method
+        addImport(android.graphics.Canvas.class);
 
         for (String include : imports) {
             str.append(String.format("import %s;\n", include));
@@ -25,13 +37,16 @@ public class OutputBuilder {
 
         str.append("\n");
 
+        str.append(String.format("public class %s {\n", className));
+        str.append(String.format("  public static void %s(Canvas canvas, int width, int height) {\n", methodName));
         str.append(output);
+        str.append("  }\n}\n");
 
         return str.toString();
     }
 
     public static void append(String text, Object... params) {
-        output.append(String.format(text + "\n", params));
+        output.append(String.format("    " + text + "\n", params));
     }
 
     public static void appendMethodCall(AndroidClass instance, String methodName) {
