@@ -64,6 +64,7 @@ public class Paint implements AndroidClass {
 
     public void setShader(Shader shader) {
         mShader = shader;
+        OutputBuilder.appendMethodCall(this, "setShader", "%s", shader.getInstanceName());
     }
 
     public float measureText(String text) {
