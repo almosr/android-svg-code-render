@@ -28,7 +28,7 @@ public class RectF implements AndroidClass {
     }
 
     public RectF(Rect rect) {
-        throw new RuntimeException("Dummy function");
+        this(rect.left, rect.top, rect.right, rect.bottom);
     }
 
     public float width() {
