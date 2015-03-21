@@ -69,11 +69,12 @@ public class Paint implements AndroidClass {
     }
 
     public float measureText(String text) {
-        throw new RuntimeException("Dummy function");
+        //TODO: measureText method in Paint
+        return 0.0f;
     }
 
     public void getTextBounds(String text, int start, int count, Rect rect) {
-        throw new RuntimeException("Dummy function");
+        //TODO: getTextBounds method in Paint
     }
 
     public float getStrokeWidth() {
