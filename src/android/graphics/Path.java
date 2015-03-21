@@ -30,7 +30,7 @@ public class Path implements AndroidClass {
     }
 
     public void computeBounds(RectF bounds, boolean exact) {
-        OutputBuilder.appendMethodCall(this, "computeBounds", "%s, %b", bounds.getInstanceName(), exact);
+        //TODO: simulate computeBound in Path class
     }
 
     public void transform(Matrix transform) {
