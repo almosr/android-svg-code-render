@@ -76,7 +76,11 @@ public class Canvas implements AndroidClass {
     }
 
     public void saveLayerAlpha(RectF rectF, int alpha, int saveFlags) {
-        OutputBuilder.appendMethodCall(this, "saveLayerAlpha", "%s, %d, %s", rectF != null ? rectF.getInstanceName() : "null", alpha, OutputBuilder.splitFlags(saveFlags, "Canvas.", flagValues, flagNames));
+        if (rectF != null) {
+            throw new RuntimeException("RectF instances in generated code is not supported");
+        }
+
+        OutputBuilder.appendMethodCall(this, "saveLayerAlpha", "null, %d, %s", alpha, OutputBuilder.splitFlags(saveFlags, "Canvas.", flagValues, flagNames));
     }
 
     public void drawBitmap(Bitmap maskedContent, float left, float top, Paint paint) {

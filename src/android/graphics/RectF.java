@@ -1,32 +1,23 @@
 package android.graphics;
 
-import android_svg_code_render.AndroidClass;
-import android_svg_code_render.Initializer;
-import android_svg_code_render.OutputBuilder;
-
 /**
  * Created by racs on 2015.03.17..
  */
-public class RectF implements AndroidClass {
+public class RectF {
     public float left;
     public float top;
     public float right;
     public float bottom;
 
-    private String mInstanceName;
-
     public RectF(float left, float top, float right, float bottom) {
-        Initializer.init(this, "%ff, %ff, %ff, %ff", left, top, right, bottom);
         initFields(left, top, right, bottom);
     }
 
     public RectF() {
-        Initializer.init(this);
     }
 
     public RectF(Rect rect) {
-        Initializer.init(this, "%s", rect.getInstanceName());
-        initFields(rect.left, rect.top, rect.right, rect.bottom);
+        //TODO: RectF constructor with Rect parameter used only by text rendering, not supported yet
     }
 
     private void initFields(float left, float top, float right, float bottom) {
@@ -45,7 +36,6 @@ public class RectF implements AndroidClass {
     }
 
     public void offset(float x, float y) {
-        OutputBuilder.appendMethodCall(this, "offset", "%ff, %ff", x, y);
         left += x;
         right += x;
         top += y;
@@ -75,15 +65,5 @@ public class RectF implements AndroidClass {
                 this.bottom = bottom;
             }
         }
-    }
-
-    @Override
-    public String getInstanceName() {
-        return mInstanceName;
-    }
-
-    @Override
-    public void setInstanceName(String instanceName) {
-        mInstanceName = instanceName;
     }
 }
