@@ -11,10 +11,6 @@ public class Shader implements AndroidClass {
 
     private String mInstanceName;
 
-    public Shader() {
-        Initializer.init(this);
-    }
-
     public void getLocalMatrix(Matrix localM) {
         if (localM != null) {
             mLocalMatrix = localM;
