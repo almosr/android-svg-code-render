@@ -41,6 +41,7 @@ public class OutputBuilder {
 
         str.append(String.format("public class %s {\n", className));
         str.append(String.format("    public static void %s(Canvas %s, int width, int height) {\n", methodName, CANVAS_PARAMETER_NAME));
+        str.append("        canvas.scale(width, height);\n");
         str.append(output);
         str.append("    }\n}\n");
 

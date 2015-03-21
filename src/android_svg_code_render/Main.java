@@ -78,8 +78,14 @@ public class Main {
         FileInputStream is = new FileInputStream(inputFileName);
 
         SVG svg = SVG.getFromInputStream(is);
+
+        //Preset scaling: document is enforced into a 1.0x1.0 pixel square,
+        //will be scaled to the right height at rendering
+        svg.setRenderDPI(1.0f);
+        svg.setDocumentWidth(1.0f);
+        svg.setDocumentHeight(1.0f);
         //Main canvas object is created with the static instance name from the method parameters
-        svg.renderToCanvas(new Canvas(OutputBuilder.CANVAS_PARAMETER_NAME, 200, 200));
+        svg.renderToCanvas(new Canvas(OutputBuilder.CANVAS_PARAMETER_NAME, 1, 1));
 
         is.close();
     }
