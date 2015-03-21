@@ -6,6 +6,8 @@ import java.util.*;
  * Created by racs on 2015.03.17..
  */
 public class OutputBuilder {
+    public static final String CANVAS_PARAMETER_NAME = "canvas";
+
     private static StringBuilder output;
     private static SortedSet<String> imports = new TreeSet<>();
 
@@ -38,7 +40,7 @@ public class OutputBuilder {
         str.append("\n");
 
         str.append(String.format("public class %s {\n", className));
-        str.append(String.format("  public static void %s(Canvas canvas, int width, int height) {\n", methodName));
+        str.append(String.format("  public static void %s(Canvas %s, int width, int height) {\n", methodName, CANVAS_PARAMETER_NAME));
         str.append(output);
         str.append("  }\n}\n");
 

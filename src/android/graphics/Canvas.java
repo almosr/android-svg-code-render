@@ -12,21 +12,32 @@ public class Canvas implements AndroidClass {
     public static final int MATRIX_SAVE_FLAG = 1;
     public String mInstanceName;
     private Matrix mMatrix;
-    private Bitmap mBitmap;
     private int[] flagValues = {MATRIX_SAVE_FLAG, HAS_ALPHA_LAYER_SAVE_FLAG};
     private String[] flagNames = {"MATRIX_SAVE_FLAG", "HAS_ALPHA_LAYER_SAVE_FLAG"};
+    private int mWidth;
+    private int mHeight;
+
+    public Canvas(String instanceName, int width, int height) {
+        //This constructor is used only by the setup code for the render method generation
+        mInstanceName = instanceName;
+        //TODO: solve dynamic parameters for width and height
+        mWidth = width;
+        mHeight = height;
+    }
 
     public Canvas(Bitmap bitmap) {
-        mBitmap = bitmap;
-        Initializer.init(this);
+        mWidth = bitmap.getWidth();
+        mHeight = bitmap.getHeight();
+
+        Initializer.init(this, String.format("%s", bitmap.getInstanceName()));
     }
 
     public int getWidth() {
-        return mBitmap.getWidth();
+        return mWidth;
     }
 
     public int getHeight() {
-        return mBitmap.getHeight();
+        return mHeight;
     }
 
     public void save() {

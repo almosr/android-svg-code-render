@@ -1,6 +1,5 @@
 package android_svg_code_render;
 
-import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import com.caverock.androidsvg.SVG;
 import com.caverock.androidsvg.SVGParseException;
@@ -79,8 +78,8 @@ public class Main {
         FileInputStream is = new FileInputStream(inputFileName);
 
         SVG svg = SVG.getFromInputStream(is);
-        Bitmap bitmap = Bitmap.createBitmap(100, 200, Bitmap.Config.ARGB_8888);
-        svg.renderToCanvas(new Canvas(bitmap));
+        //Main canvas object is created with the static instance name from the method parameters
+        svg.renderToCanvas(new Canvas(OutputBuilder.CANVAS_PARAMETER_NAME, 200, 200));
 
         is.close();
     }
