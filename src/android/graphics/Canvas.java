@@ -76,7 +76,7 @@ public class Canvas implements AndroidClass {
     }
 
     public void saveLayerAlpha(RectF rectF, int alpha, int saveFlags) {
-        OutputBuilder.appendMethodCall(this, "saveLayerAlpha", "%s, %d, %s", rectF.getInstanceName(), alpha, OutputBuilder.splitFlags(saveFlags, "Canvas.", flagValues, flagNames));
+        OutputBuilder.appendMethodCall(this, "saveLayerAlpha", "%s, %d, %s", rectF != null ? rectF.getInstanceName() : "null", alpha, OutputBuilder.splitFlags(saveFlags, "Canvas.", flagValues, flagNames));
     }
 
     public void drawBitmap(Bitmap maskedContent, float left, float top, Paint paint) {
