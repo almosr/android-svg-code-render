@@ -82,14 +82,24 @@ public class OutputBuilder {
     }
 
     public static String createArrayParameter(float[] array) {
-        return String.format("new float[] %s", Arrays.toString(array).replace("[", "{").replace("]", "f}").replace(",","f,"));
+        return String.format("new float[] %s", Arrays.toString(array).replace("[", "{").replace("]", "f}").replace(",", "f,"));
     }
 
-    public static String createArrayParameter(int[] array) {
-        return String.format("new int[] %s", Arrays.toString(array).replace("[", "{").replace("]", "}"));
+    public static String createArrayParameter(int[] array, boolean hexFormat) {
+        String numFormat = hexFormat ? "0x%08x" : "%d";
+        StringBuilder numlist = new StringBuilder();
+        numlist.append("new int[] {");
+        for (int i = 0; i < array.length; i++) {
+            numlist.append(String.format(numFormat, array[i]));
+            if (i != array.length - 1) {
+                numlist.append(", ");
+            }
+        }
+        numlist.append("}");
+        return numlist.toString();
     }
 
     public static void addImport(Class clazz) {
-        imports.add(clazz.getName().replace("$","."));
+        imports.add(clazz.getName().replace("$", "."));
     }
 }

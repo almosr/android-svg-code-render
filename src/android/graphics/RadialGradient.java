@@ -14,7 +14,7 @@ public class RadialGradient extends Shader {
 
         Initializer.init(this, String.format("%ff, %ff, %ff, %s, %s, %s",
                 cx, cy, r,
-                OutputBuilder.createArrayParameter(colours),
+                OutputBuilder.createArrayParameter(colours, true),
                 OutputBuilder.createArrayParameter(positions),
                 "Shader.TileMode." + tileMode.name()));
     }

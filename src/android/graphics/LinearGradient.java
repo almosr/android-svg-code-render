@@ -13,7 +13,7 @@ public class LinearGradient extends Shader {
 
         Initializer.init(this, String.format("%ff, %ff, %ff, %ff, %s, %s, %s",
                 x1, y1, x2, y2,
-                OutputBuilder.createArrayParameter(colours),
+                OutputBuilder.createArrayParameter(colours, true),
                 OutputBuilder.createArrayParameter(positions),
                 "Shader.TileMode." + tileMode.name()));
     }
