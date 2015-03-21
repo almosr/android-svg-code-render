@@ -56,6 +56,7 @@ public class Paint implements AndroidClass {
 
     public void setTextSize(float textSize) {
         mTextSize = textSize;
+        OutputBuilder.appendMethodCall(this, "setTextSize", "%ff", textSize);
     }
 
     public Shader getShader() {
@@ -81,14 +82,17 @@ public class Paint implements AndroidClass {
 
     public void setStrokeWidth(float strokeWidth) {
         mStrokeWidth = strokeWidth;
+        OutputBuilder.appendMethodCall(this, "setStrokeWidth", "%ff", strokeWidth);
     }
 
     public void setStrokeCap(Cap strokeCap) {
         mStrokeCap = strokeCap;
+        OutputBuilder.appendMethodCall(this, "setStrokeCap", "Paint.Cap.%s", strokeCap.name());
     }
 
     public void setStrokeJoin(Join strokeJoin) {
         mStrokeJoin = strokeJoin;
+        OutputBuilder.appendMethodCall(this, "setStrokeJoin", "Paint.Join.%s", strokeJoin.name());
     }
 
     public Float getStrokeMiter() {
@@ -97,6 +101,7 @@ public class Paint implements AndroidClass {
 
     public void setStrokeMiter(Float strokeMiter) {
         mStrokeMiter = strokeMiter;
+        OutputBuilder.appendMethodCall(this, "setStrokeMiter", "%ff", strokeMiter);
     }
 
     public PathEffect getPathEffect() {
@@ -105,6 +110,12 @@ public class Paint implements AndroidClass {
 
     public void setPathEffect(PathEffect pathEffect) {
         mPathEffect = pathEffect;
+        if (pathEffect != null) {
+            OutputBuilder.addImport(pathEffect.getClass());
+            OutputBuilder.appendMethodCall(this, "setPathEffect", "%s", pathEffect.getClass().getSimpleName());
+        } else {
+            OutputBuilder.appendMethodCall(this, "setPathEffect", "null");
+        }
     }
 
     public boolean isStrikeThruText() {
@@ -121,6 +132,7 @@ public class Paint implements AndroidClass {
 
     public void setUnderlineText(boolean underlineText) {
         mUnderlineText = underlineText;
+        OutputBuilder.appendMethodCall(this, "setUnderlineText", "%b", underlineText);
     }
 
     public void setTypeface(Typeface typeface) {
@@ -134,6 +146,7 @@ public class Paint implements AndroidClass {
 
     public void setColor(int color) {
         mColor = color;
+        OutputBuilder.appendMethodCall(this, "setColor", "0x%08x", color);
     }
 
     public void getTextPath(String text, int start, int end, float x, float y, Path path) {
