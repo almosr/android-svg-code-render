@@ -40,15 +40,15 @@ public class OutputBuilder {
         str.append("\n");
 
         str.append(String.format("public class %s {\n", className));
-        str.append(String.format("  public static void %s(Canvas %s, int width, int height) {\n", methodName, CANVAS_PARAMETER_NAME));
+        str.append(String.format("    public static void %s(Canvas %s, int width, int height) {\n", methodName, CANVAS_PARAMETER_NAME));
         str.append(output);
-        str.append("  }\n}\n");
+        str.append("    }\n}\n");
 
         return str.toString();
     }
 
     public static void append(String text, Object... params) {
-        output.append(String.format("    " + text + "\n", params));
+        output.append(String.format("        " + text + "\n", params));
     }
 
     public static void appendMethodCall(AndroidClass instance, String methodName) {
