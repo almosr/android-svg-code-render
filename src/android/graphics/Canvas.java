@@ -29,7 +29,7 @@ public class Canvas implements AndroidClass {
         mWidth = bitmap.getWidth();
         mHeight = bitmap.getHeight();
 
-        Initializer.init(this, String.format("%s", bitmap.getInstanceName()));
+        Initializer.init(this, "%s", bitmap.getInstanceName());
     }
 
     public int getWidth() {

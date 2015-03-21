@@ -12,7 +12,7 @@ public class Initializer {
         init(instance, null);
     }
 
-    public static void init(AndroidClass instance, String parameters) {
+    public static void init(AndroidClass instance, String parameters, Object... objects) {
         instance.setInstanceName(generateInstanceName(instance.getClass()));
 
         OutputBuilder.addImport(instance.getClass());
@@ -22,7 +22,7 @@ public class Initializer {
                 simpleClassName,
                 instance.getInstanceName(),
                 simpleClassName,
-                parameters != null ? parameters : "");
+                parameters != null ? String.format(parameters, objects) : "");
     }
 
     public static String generateInstanceName(Class clazz) {

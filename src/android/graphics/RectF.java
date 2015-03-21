@@ -16,7 +16,7 @@ public class RectF implements AndroidClass {
     private String mInstanceName;
 
     public RectF(float left, float top, float right, float bottom) {
-        Initializer.init(this, String.format("%ff, %ff, %ff, %ff", left, top, right, bottom));
+        Initializer.init(this, "%ff, %ff, %ff, %ff", left, top, right, bottom);
         initFields(left, top, right, bottom);
     }
 
@@ -25,7 +25,7 @@ public class RectF implements AndroidClass {
     }
 
     public RectF(Rect rect) {
-        Initializer.init(this, String.format("%s", rect.getInstanceName()));
+        Initializer.init(this, "%s", rect.getInstanceName());
         initFields(rect.left, rect.top, rect.right, rect.bottom);
     }
 
