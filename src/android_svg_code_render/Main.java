@@ -4,18 +4,19 @@ import android.graphics.Canvas;
 import com.caverock.androidsvg.SVG;
 import com.caverock.androidsvg.SVGParseException;
 
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.PrintWriter;
+import java.io.*;
+import java.text.SimpleDateFormat;
 import java.util.Locale;
 
 /**
- * Created by racs on 2015.03.17..
+ * Main class
+ *
+ * @author Almos Rajnai
  */
 public class Main {
 
     private static String sInputFileName;
+    private static String sSimpleInputFileName;
     private static String sOutFileName;
     private static String sPackageName;
     private static String sClassName;
@@ -37,7 +38,7 @@ public class Main {
         }
 
         try {
-            saveOutput(sOutFileName, OutputBuilder.getResult(sInputFileName, sPackageName, sClassName, sMethodName));
+            saveOutput(sOutFileName, OutputBuilder.getResult(sSimpleInputFileName, sPackageName, sClassName, sMethodName));
         } catch (FileNotFoundException e) {
             error(e, "Error while saving result");
         }
@@ -52,6 +53,7 @@ public class Main {
         }
 
         sInputFileName = args[0];
+        sSimpleInputFileName = new File(sInputFileName).getName();
 
         sPackageName = "svgrenderpackage";
         if (args.length > 1) {
@@ -84,6 +86,7 @@ public class Main {
         svg.setRenderDPI(1.0f);
         svg.setDocumentWidth(1.0f);
         svg.setDocumentHeight(1.0f);
+
         //Main canvas object is created with the static instance name from the method parameters
         svg.renderToCanvas(new Canvas(OutputBuilder.CANVAS_PARAMETER_NAME, 1, 1));
 
@@ -97,6 +100,7 @@ public class Main {
     }
 
     private static void printHelp() {
+        System.out.println(String.format("android-svg-code-render v%s (%s)", Version.FULL, new SimpleDateFormat("dd/mm/yyyy HH:mm").format(Version.BUILD_TIME)));
         System.out.println("Usage: android-svg-code-render inputfile.svg <package name> <class name> <method name> <outputfile.java>\n");
     }
 

@@ -3,7 +3,9 @@ package android_svg_code_render;
 import java.util.*;
 
 /**
- * Created by racs on 2015.03.17..
+ * Output builder class for collecting and formatting generated Java file out of method calls
+ *
+ * @author Almos Rajnai
  */
 public class OutputBuilder {
     public static final String CANVAS_PARAMETER_NAME = "canvas";
@@ -25,7 +27,7 @@ public class OutputBuilder {
         str.append(String.format(" * Original file name: %s\n", fileName));
         str.append(String.format(" * Conversion date: %s\n", new Date().toString()));
         str.append(" *\n");
-        str.append(" * Converted by android-svg-code-render\n");
+        str.append(String.format(" * Converted by android-svg-code-render v%s\n", Version.FULL));
         str.append(" * https://github.com/racsdragon/android-svg-code-render\n");
         str.append(" **/\n\n");
 
