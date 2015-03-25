@@ -5,7 +5,9 @@ import android_svg_code_render.Initializer;
 import android_svg_code_render.OutputBuilder;
 
 /**
- * Created by racs on 2015.03.17..
+ * Simulated Android Paint class
+ *
+ * @author Almos Rajnai
  */
 public class Paint implements AndroidClass {
     public static final int ANTI_ALIAS_FLAG = 1;
@@ -26,10 +28,16 @@ public class Paint implements AndroidClass {
     private Typeface mTypeface;
     private int mColor;
 
+    private Paint mParent;
+
     private String mInstanceName;
 
     public Paint(Paint paint) {
-        Initializer.init(this, paint.getInstanceName());
+        //Inherited Paint instance is not initialized in the output unless it is used by through other functions
+        mParent = paint;
+
+        //Use the same name as the source Paint object unless something changes the fields from the outside
+        mInstanceName = paint.mInstanceName;
     }
 
     public Paint() {
@@ -37,11 +45,13 @@ public class Paint implements AndroidClass {
     }
 
     public void setFlags(int flags) {
+        checkInheritance();
         String flagString = OutputBuilder.splitFlags(flags, "Paint.", flagValues, flagNames);
         OutputBuilder.appendMethodCall(this, "setFlags", "%s", flagString);
     }
 
     public void setStyle(Style style) {
+        checkInheritance();
         OutputBuilder.addImport(Paint.class);
         OutputBuilder.appendMethodCall(this, "setStyle", "Paint.Style.%s", style.name());
     }
@@ -55,6 +65,7 @@ public class Paint implements AndroidClass {
     }
 
     public void setTextSize(float textSize) {
+        checkInheritance();
         mTextSize = textSize;
         OutputBuilder.appendMethodCall(this, "setTextSize", "%ff", textSize);
     }
@@ -64,6 +75,7 @@ public class Paint implements AndroidClass {
     }
 
     public void setShader(Shader shader) {
+        checkInheritance();
         mShader = shader;
         OutputBuilder.appendMethodCall(this, "setShader", "%s", shader.getInstanceName());
     }
@@ -82,16 +94,19 @@ public class Paint implements AndroidClass {
     }
 
     public void setStrokeWidth(float strokeWidth) {
+        checkInheritance();
         mStrokeWidth = strokeWidth;
         OutputBuilder.appendMethodCall(this, "setStrokeWidth", "%ff", strokeWidth);
     }
 
     public void setStrokeCap(Cap strokeCap) {
+        checkInheritance();
         mStrokeCap = strokeCap;
         OutputBuilder.appendMethodCall(this, "setStrokeCap", "Paint.Cap.%s", strokeCap.name());
     }
 
     public void setStrokeJoin(Join strokeJoin) {
+        checkInheritance();
         mStrokeJoin = strokeJoin;
         OutputBuilder.appendMethodCall(this, "setStrokeJoin", "Paint.Join.%s", strokeJoin.name());
     }
@@ -101,6 +116,7 @@ public class Paint implements AndroidClass {
     }
 
     public void setStrokeMiter(Float strokeMiter) {
+        checkInheritance();
         mStrokeMiter = strokeMiter;
         OutputBuilder.appendMethodCall(this, "setStrokeMiter", "%ff", strokeMiter);
     }
@@ -110,6 +126,7 @@ public class Paint implements AndroidClass {
     }
 
     public void setPathEffect(PathEffect pathEffect) {
+        checkInheritance();
         mPathEffect = pathEffect;
         if (pathEffect != null) {
             OutputBuilder.addImport(pathEffect.getClass());
@@ -124,6 +141,7 @@ public class Paint implements AndroidClass {
     }
 
     public void setStrikeThruText(boolean strikeThruText) {
+        checkInheritance();
         mStrikeThruText = strikeThruText;
     }
 
@@ -132,11 +150,13 @@ public class Paint implements AndroidClass {
     }
 
     public void setUnderlineText(boolean underlineText) {
+        checkInheritance();
         mUnderlineText = underlineText;
         OutputBuilder.appendMethodCall(this, "setUnderlineText", "%b", underlineText);
     }
 
     public void setTypeface(Typeface typeface) {
+        checkInheritance();
         OutputBuilder.addImport(Typeface.class);
         OutputBuilder.appendMethodCall(this, "setTypeface", "%s", typeface.getInstanceName());
     }
@@ -146,6 +166,7 @@ public class Paint implements AndroidClass {
     }
 
     public void setColor(int color) {
+        checkInheritance();
         mColor = color;
         OutputBuilder.appendMethodCall(this, "setColor", "0x%08x", color);
     }
@@ -166,6 +187,17 @@ public class Paint implements AndroidClass {
 
     public enum Style {
         STROKE, FILL
+    }
+
+    private void checkInheritance() {
+        //This function is called when a property is set from the outside.
+        //If the instance is "inherited", that means it was not initialized and represents the same
+        //Paint instance which was used in the constructor as parameter.
+        //But since this instance will be changed now we need a real new Paint instance, so we create it now.
+        if (mParent != null) {
+            Initializer.init(this, mParent.getInstanceName());
+            mParent = null;
+        }
     }
 
     public enum Cap {ROUND, SQUARE, BUTT}
