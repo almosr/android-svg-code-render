@@ -41,8 +41,9 @@ public class OutputBuilder {
 
         str.append("\n");
 
+        //TODO: implement file template instead of hard-coded file structure
         str.append(String.format("public class %s {\n", className));
-        str.append(String.format("    public static void %s(Canvas %s, int width, int height) {\n", methodName, CANVAS_PARAMETER_NAME));
+        str.append(String.format("    public static void %s(Canvas %s, Integer width, Integer height) {\n", methodName, CANVAS_PARAMETER_NAME));
         str.append("        canvas.scale(width, height);\n");
         str.append(output);
         str.append("    }\n}\n");
