@@ -5,7 +5,9 @@ import android_svg_code_render.Initializer;
 import android_svg_code_render.OutputBuilder;
 
 /**
- * Created by racs on 2015.03.17..
+ * Simulated Android Matrix class
+ *
+ * @author Almos Rajnai
  */
 public class Matrix implements AndroidClass {
     private String mInstanceName;
@@ -42,11 +44,15 @@ public class Matrix implements AndroidClass {
     }
 
     public void preTranslate(float x, float y) {
-        OutputBuilder.appendMethodCall(this, "preTranslate", "%ff, %ff", x, y);
+        if (x != 0.0f || y != 0.0f) {
+            OutputBuilder.appendMethodCall(this, "preTranslate", "%ff, %ff", x, y);
+        }
     }
 
     public void preScale(float xScale, float yScale) {
-        OutputBuilder.appendMethodCall(this, "preScale", "%ff, %ff", xScale, yScale);
+        if (xScale != 1.0f || yScale != 1.0f) {
+            OutputBuilder.appendMethodCall(this, "preScale", "%ff, %ff", xScale, yScale);
+        }
     }
 
     public void postScale(float rx, float ry) {
