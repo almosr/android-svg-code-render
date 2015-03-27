@@ -2,7 +2,6 @@ package android.graphics;
 
 import android.content.res.AssetManager;
 import android_svg_code_render.AndroidClass;
-import android_svg_code_render.Initializer;
 import android_svg_code_render.OutputBuilder;
 
 /**
@@ -32,7 +31,7 @@ public class Typeface extends AndroidClass {
     }
 
     public static Typeface create(Typeface family, int typefaceStyle) {
-        Typeface newTypeface = new Typeface(Initializer.generateInstanceName(Typeface.class));
+        Typeface newTypeface = new Typeface(generateInstanceName(Typeface.class));
 
         OutputBuilder.addImport(Typeface.class);
 

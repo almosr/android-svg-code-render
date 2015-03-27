@@ -1,7 +1,6 @@
 package android.graphics;
 
 import android_svg_code_render.AndroidClass;
-import android_svg_code_render.Initializer;
 import android_svg_code_render.OutputBuilder;
 
 /**
@@ -19,7 +18,7 @@ public class Bitmap extends AndroidClass {
 
         OutputBuilder.addImport(Bitmap.class);
         OutputBuilder.addImport(Config.class);
-        mInstanceName = Initializer.generateInstanceName(Bitmap.class);
+        mInstanceName = generateInstanceName(Bitmap.class);
     }
 
     public static Bitmap createBitmap(int width, int height, Config bitmapConfig) {

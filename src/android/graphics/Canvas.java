@@ -1,7 +1,6 @@
 package android.graphics;
 
 import android_svg_code_render.AndroidClass;
-import android_svg_code_render.Initializer;
 import android_svg_code_render.OutputBuilder;
 
 /**
@@ -33,7 +32,7 @@ public class Canvas extends AndroidClass {
         mWidth = bitmap.getWidth();
         mHeight = bitmap.getHeight();
 
-        Initializer.init(this, "%s", bitmap.getInstanceName(this));
+        init("%s", bitmap.getInstanceName(this));
     }
 
     public int getWidth() {
@@ -69,7 +68,7 @@ public class Canvas extends AndroidClass {
         OutputBuilder.appendMethodCall(this, "concat", "%s", matrix.getInstanceName(this));
         //Simulate concatenation
         if (matrix != null) {
-            mMatrix = new Matrix(Initializer.generateInstanceName(Matrix.class));
+            mMatrix = new Matrix(generateInstanceName(Matrix.class));
             OutputBuilder.append(mMatrix, "Matrix %s = %s.getMatrix();", mMatrix.getInstanceName(this), getInstanceName(this));
         }
     }

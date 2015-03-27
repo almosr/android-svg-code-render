@@ -1,7 +1,6 @@
 package android.graphics;
 
 import android_svg_code_render.AndroidClass;
-import android_svg_code_render.Initializer;
 import android_svg_code_render.OutputBuilder;
 
 /**

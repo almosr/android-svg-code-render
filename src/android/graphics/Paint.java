@@ -1,7 +1,6 @@
 package android.graphics;
 
 import android_svg_code_render.AndroidClass;
-import android_svg_code_render.Initializer;
 import android_svg_code_render.OutputBuilder;
 
 /**
@@ -39,7 +38,7 @@ public class Paint extends AndroidClass {
     }
 
     public Paint() {
-        Initializer.init(this);
+        init();
     }
 
     public void setFlags(int flags) {
@@ -194,7 +193,7 @@ public class Paint extends AndroidClass {
         //But since this instance will be changed now we need a real new Paint instance, so we create it now.
         if (mParent != null) {
             //This instance is referring to the parent class
-            Initializer.init(this, mParent.getInstanceName(this));
+            init(mParent.getInstanceName(this));
             mParent = null;
         }
     }

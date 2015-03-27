@@ -1,7 +1,6 @@
 package android.graphics;
 
 import android_svg_code_render.AndroidClass;
-import android_svg_code_render.Initializer;
 import android_svg_code_render.OutputBuilder;
 
 /**
@@ -14,7 +13,7 @@ public class Path extends AndroidClass {
     private Path.FillType mFillType;
 
     public Path() {
-        Initializer.init(this);
+        init();
     }
 
     public void transform(Matrix currentMatrix, Path transformedPath) {

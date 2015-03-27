@@ -1,5 +1,6 @@
 package android_svg_code_render;
 
+import java.util.HashMap;
 import java.util.HashSet;
 
 /**
@@ -11,6 +12,9 @@ import java.util.HashSet;
  * @author Almos Rajnai
  */
 public abstract class AndroidClass {
+
+    private static HashMap<Class, Integer> sNameCache = new HashMap<>();
+
     private HashSet<AndroidClass> mUsedBy = new HashSet<>();
     protected String mInstanceName;
 
@@ -44,5 +48,34 @@ public abstract class AndroidClass {
         mUsedBy = validDependencies;
 
         return wasChange;
+    }
+
+    public void init() {
+        init(null);
+    }
+
+    public void init(String parameters, Object... objects) {
+        setInstanceName(generateInstanceName(getClass()));
+
+        OutputBuilder.addImport(getClass());
+
+        String simpleClassName = getClass().getSimpleName();
+        OutputBuilder.append(this, "%s %s = new %s(%s);",
+                simpleClassName,
+                getInstanceName(null),
+                simpleClassName,
+                parameters != null ? String.format(parameters, objects) : "");
+    }
+
+    public static String generateInstanceName(Class clazz) {
+        Integer count = sNameCache.get(clazz);
+        if (count == null) {
+            count = 0;
+        }
+
+        String name = String.format("%s_%d", clazz.getSimpleName(), count).toLowerCase();
+        count++;
+        sNameCache.put(clazz, count);
+        return name;
     }
 }
