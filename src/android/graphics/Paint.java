@@ -9,7 +9,7 @@ import android_svg_code_render.OutputBuilder;
  *
  * @author Almos Rajnai
  */
-public class Paint implements AndroidClass {
+public class Paint extends AndroidClass {
     public static final int ANTI_ALIAS_FLAG = 1;
     public static final int DEV_KERN_TEXT_FLAG = 2;
     public static final int SUBPIXEL_TEXT_FLAG = 4;
@@ -29,8 +29,6 @@ public class Paint implements AndroidClass {
     private int mColor;
 
     private Paint mParent;
-
-    private String mInstanceName;
 
     public Paint(Paint paint) {
         //Inherited Paint instance is not initialized in the output unless it is used by through other functions
@@ -77,7 +75,7 @@ public class Paint implements AndroidClass {
     public void setShader(Shader shader) {
         checkInheritance();
         mShader = shader;
-        OutputBuilder.appendMethodCall(this, "setShader", "%s", shader.getInstanceName());
+        OutputBuilder.appendMethodCall(this, "setShader", "%s", shader.getInstanceName(this));
     }
 
     public float measureText(String text) {
@@ -158,7 +156,7 @@ public class Paint implements AndroidClass {
     public void setTypeface(Typeface typeface) {
         checkInheritance();
         OutputBuilder.addImport(Typeface.class);
-        OutputBuilder.appendMethodCall(this, "setTypeface", "%s", typeface.getInstanceName());
+        OutputBuilder.appendMethodCall(this, "setTypeface", "%s", typeface.getInstanceName(this));
     }
 
     public int getColor() {
@@ -175,18 +173,18 @@ public class Paint implements AndroidClass {
         throw new RuntimeException("Dummy function");
     }
 
-    @Override
-    public String getInstanceName() {
-        return mInstanceName;
-    }
-
-    @Override
-    public void setInstanceName(String instanceName) {
-        mInstanceName = instanceName;
-    }
-
     public enum Style {
         STROKE, FILL
+    }
+
+    @Override
+    public String getInstanceName(AndroidClass referringClass) {
+        //If this instance had a parent instance then that instance must receive the referring class
+        if (mParent != null && referringClass != null) {
+            return mParent.getInstanceName(referringClass);
+        }
+
+        return super.getInstanceName(referringClass);
     }
 
     private void checkInheritance() {
@@ -195,7 +193,8 @@ public class Paint implements AndroidClass {
         //Paint instance which was used in the constructor as parameter.
         //But since this instance will be changed now we need a real new Paint instance, so we create it now.
         if (mParent != null) {
-            Initializer.init(this, mParent.getInstanceName());
+            //This instance is referring to the parent class
+            Initializer.init(this, mParent.getInstanceName(this));
             mParent = null;
         }
     }

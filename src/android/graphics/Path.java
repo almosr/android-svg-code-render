@@ -5,11 +5,12 @@ import android_svg_code_render.Initializer;
 import android_svg_code_render.OutputBuilder;
 
 /**
- * Created by racs on 2015.03.17..
+ * Simulated Android Path class
+ *
+ * @author Almos Rajnai
  */
-public class Path implements AndroidClass {
+public class Path extends AndroidClass {
 
-    private String mInstanceName;
     private Path.FillType mFillType;
 
     public Path() {
@@ -17,7 +18,7 @@ public class Path implements AndroidClass {
     }
 
     public void transform(Matrix currentMatrix, Path transformedPath) {
-        OutputBuilder.appendMethodCall(this, "transform", "%s, %s", currentMatrix.getInstanceName(), transformedPath.getInstanceName());
+        OutputBuilder.appendMethodCall(this, "transform", "%s, %s", currentMatrix.getInstanceName(this), transformedPath.getInstanceName(this));
     }
 
     public Path.FillType getFillType() {
@@ -58,21 +59,11 @@ public class Path implements AndroidClass {
     }
 
     public void addPath(Path path, Matrix matrix) {
-        OutputBuilder.appendMethodCall(this, "addPath", "%s, %s", path.getInstanceName(), matrix.getInstanceName());
+        OutputBuilder.appendMethodCall(this, "addPath", "%s, %s", path.getInstanceName(this), matrix.getInstanceName(this));
     }
 
     public void addPath(Path src) {
-        OutputBuilder.appendMethodCall(this, "addPath", "%s", src.getInstanceName());
-    }
-
-    @Override
-    public String getInstanceName() {
-        return mInstanceName;
-    }
-
-    @Override
-    public void setInstanceName(String instanceName) {
-        mInstanceName = instanceName;
+        OutputBuilder.appendMethodCall(this, "addPath", "%s", src.getInstanceName(this));
     }
 
     public enum FillType {EVEN_ODD, WINDING}

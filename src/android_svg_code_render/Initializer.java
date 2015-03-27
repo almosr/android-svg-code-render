@@ -3,7 +3,9 @@ package android_svg_code_render;
 import java.util.HashMap;
 
 /**
- * Created by racs on 2015.03.18..
+ * Initializer for simulated Android classes
+ *
+ * @author Almos Rajnai
  */
 public class Initializer {
     private static HashMap<Class, Integer> mNameCache = new HashMap<>();
@@ -18,9 +20,9 @@ public class Initializer {
         OutputBuilder.addImport(instance.getClass());
 
         String simpleClassName = instance.getClass().getSimpleName();
-        OutputBuilder.append("%s %s = new %s(%s);",
+        OutputBuilder.append(instance, "%s %s = new %s(%s);",
                 simpleClassName,
-                instance.getInstanceName(),
+                instance.getInstanceName(null),
                 simpleClassName,
                 parameters != null ? String.format(parameters, objects) : "");
     }

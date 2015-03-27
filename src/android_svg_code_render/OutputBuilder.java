@@ -3,22 +3,28 @@ package android_svg_code_render;
 import java.util.*;
 
 /**
- * Output builder class for collecting and formatting generated Java file out of method calls
+ * Output builder class for collecting and formatting generated Java file from method calls
  *
  * @author Almos Rajnai
  */
 public class OutputBuilder {
     public static final String CANVAS_PARAMETER_NAME = "canvas";
 
-    private static StringBuilder output;
-    private static SortedSet<String> imports = new TreeSet<>();
+    private static ArrayList<OutputItem> sOutput;
+    private static SortedSet<String> sImports;
+    private static HashSet<AndroidClass> sInstances;
 
     public static void init() {
-        output = new StringBuilder();
+        sOutput = new ArrayList<>();
+        sImports = new TreeSet<>();
+        sInstances = new HashSet<>();
     }
 
     public static String getResult(String fileName, String packageName, String className, String methodName) {
-        StringBuilder str = new StringBuilder();
+
+        optimize();
+
+        StringBuilder str = new StringBuilder(10000);
 
         str.append(String.format("package %s;\n\n", packageName));
 
@@ -35,7 +41,7 @@ public class OutputBuilder {
         //we need the Canvas class as a parameter for the render method
         addImport(android.graphics.Canvas.class);
 
-        for (String include : imports) {
+        for (String include : sImports) {
             str.append(String.format("import %s;\n", include));
         }
 
@@ -45,14 +51,16 @@ public class OutputBuilder {
         str.append(String.format("public class %s {\n", className));
         str.append(String.format("    public static void %s(Canvas %s, Integer width, Integer height) {\n", methodName, CANVAS_PARAMETER_NAME));
         str.append("        canvas.scale(width, height);\n");
-        str.append(output);
+        str.append(mergeOutput());
         str.append("    }\n}\n");
 
         return str.toString();
     }
 
-    public static void append(String text, Object... params) {
-        output.append(String.format("        " + text + "\n", params));
+    public static void append(AndroidClass instance, String text, Object... params) {
+        sOutput.add(new OutputItem(instance, String.format("        " + text + "\n", params)));
+
+        sInstances.add(instance);
     }
 
     public static void appendMethodCall(AndroidClass instance, String methodName) {
@@ -63,7 +71,7 @@ public class OutputBuilder {
         if (parameters == null) {
             parameters = "";
         }
-        append(String.format("%s.%s(%s);", instance.getInstanceName(), methodName, String.format(parameters, objects)));
+        append(instance, String.format("%s.%s(%s);", instance.getInstanceName(null), methodName, String.format(parameters, objects)));
     }
 
     public static String splitFlags(int flags, String prefix, int[] values, String[] names) {
@@ -103,6 +111,48 @@ public class OutputBuilder {
     }
 
     public static void addImport(Class clazz) {
-        imports.add(clazz.getName().replace("$", "."));
+        sImports.add(clazz.getName().replace("$", "."));
+    }
+
+    private static void optimize() {
+        boolean wasChange;
+        do {
+            wasChange = false;
+
+            for (AndroidClass instance : sInstances) {
+                wasChange |= instance.removeUnusedDependencies();
+            }
+
+        } while (wasChange);
+    }
+
+    private static String mergeOutput() {
+        StringBuilder output = new StringBuilder(10000);
+
+        for (OutputItem outputItem : sOutput) {
+            if (outputItem.getInstance().isUsed()) {
+                output.append(outputItem.getOutput());
+            }
+        }
+
+        return output.toString();
+    }
+
+    private static class OutputItem {
+        private final AndroidClass mInstance;
+        private final String mOutput;
+
+        public OutputItem(AndroidClass instance, String output) {
+            mInstance = instance;
+            mOutput = output;
+        }
+
+        public AndroidClass getInstance() {
+            return mInstance;
+        }
+
+        public String getOutput() {
+            return mOutput;
+        }
     }
 }

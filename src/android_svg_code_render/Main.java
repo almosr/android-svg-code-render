@@ -88,7 +88,7 @@ public class Main {
         svg.setDocumentHeight(1.0f);
 
         //Main canvas object is created with the static instance name from the method parameters
-        svg.renderToCanvas(new Canvas(OutputBuilder.CANVAS_PARAMETER_NAME, 1, 1));
+        svg.renderToCanvas(new Canvas(OutputBuilder.CANVAS_PARAMETER_NAME, 1, 1, true));
 
         is.close();
     }

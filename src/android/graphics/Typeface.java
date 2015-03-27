@@ -6,9 +6,11 @@ import android_svg_code_render.Initializer;
 import android_svg_code_render.OutputBuilder;
 
 /**
- * Created by racs on 2015.03.17..
+ * Simulated Android Typeface class
+ *
+ * @author Almos Rajnai
  */
-public class Typeface implements AndroidClass {
+public class Typeface extends AndroidClass {
     public static final Typeface DEFAULT = new Typeface("Typeface.DEFAULT");
     public static final Typeface SERIF = new Typeface("Typeface.SERIF");
     public static final Typeface SANS_SERIF = new Typeface("Typeface.SANS_SERIF");
@@ -20,7 +22,6 @@ public class Typeface implements AndroidClass {
     public static final int BOLD_ITALIC = 3;
     private static int[] styleValues = {NORMAL, BOLD, ITALIC};
     private static String[] styleNames = {"NORMAL", "BOLD", "ITALIC"};
-    private String mInstanceName;
 
     public Typeface(String instanceName) {
         mInstanceName = instanceName;
@@ -36,19 +37,9 @@ public class Typeface implements AndroidClass {
         OutputBuilder.addImport(Typeface.class);
 
         String styleFlags = OutputBuilder.splitFlags(typefaceStyle, "Typeface.", styleValues, styleNames);
-        OutputBuilder.append("Typeface %s = Typeface.create(%s, %s);", newTypeface.mInstanceName, family.getInstanceName(), styleFlags);
+        OutputBuilder.append(newTypeface, "Typeface %s = Typeface.create(%s, %s);", newTypeface.mInstanceName, family.getInstanceName(newTypeface), styleFlags);
 
         return newTypeface;
 
-    }
-
-    @Override
-    public String getInstanceName() {
-        return mInstanceName;
-    }
-
-    @Override
-    public void setInstanceName(String instanceName) {
-        mInstanceName = instanceName;
     }
 }

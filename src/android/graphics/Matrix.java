@@ -9,8 +9,7 @@ import android_svg_code_render.OutputBuilder;
  *
  * @author Almos Rajnai
  */
-public class Matrix implements AndroidClass {
-    private String mInstanceName;
+public class Matrix extends AndroidClass {
 
     public Matrix(Matrix matrix) {
         throw new RuntimeException("Dummy function");
@@ -25,18 +24,18 @@ public class Matrix implements AndroidClass {
     }
 
     public void postConcat(Matrix matrix) {
-        OutputBuilder.appendMethodCall(this, "postConcat", matrix.mInstanceName);
+        OutputBuilder.appendMethodCall(this, "postConcat", matrix.getInstanceName(this));
     }
 
     public boolean invert(Matrix matrix) {
-        OutputBuilder.appendMethodCall(this, "invert", "%s", matrix.getInstanceName());
+        OutputBuilder.appendMethodCall(this, "invert", "%s", matrix.getInstanceName(this));
 
         //TODO: matrix invert
         return true;
     }
 
     public void preConcat(Matrix matrix) {
-        OutputBuilder.appendMethodCall(this, "preConcat", matrix.mInstanceName);
+        OutputBuilder.appendMethodCall(this, "preConcat", matrix.getInstanceName(this));
     }
 
     public void mapPoints(float[] points) {
@@ -85,15 +84,5 @@ public class Matrix implements AndroidClass {
 
     public void preRotate(float degree, float cx, float cy) {
         throw new RuntimeException("Dummy function");
-    }
-
-    @Override
-    public String getInstanceName() {
-        return mInstanceName;
-    }
-
-    @Override
-    public void setInstanceName(String instanceName) {
-        mInstanceName = instanceName;
     }
 }

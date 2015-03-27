@@ -5,13 +5,13 @@ import android_svg_code_render.Initializer;
 import android_svg_code_render.OutputBuilder;
 
 /**
- * Created by racs on 2015.03.17..
+ * Simulated Android Bitmap class
+ *
+ * @author Almos Rajnai
  */
-public class Bitmap implements AndroidClass {
+public class Bitmap extends AndroidClass {
     private int mWidth;
     private int mHeight;
-
-    private String mInstanceName;
 
     private Bitmap(int width, int height, Config config) {
         mWidth = width;
@@ -24,7 +24,7 @@ public class Bitmap implements AndroidClass {
 
     public static Bitmap createBitmap(int width, int height, Config bitmapConfig) {
         Bitmap bitmap = new Bitmap(width, height, bitmapConfig);
-        OutputBuilder.append("Bitmap %s = Bitmap.createBitmap(%d, %d, Config.%s);", bitmap.mInstanceName, width, height, bitmapConfig.name());
+        OutputBuilder.append(bitmap, "Bitmap %s = Bitmap.createBitmap(%d, %d, Config.%s);", bitmap.getInstanceName(null), width, height, bitmapConfig.name());
         return bitmap;
     }
 
@@ -48,16 +48,6 @@ public class Bitmap implements AndroidClass {
 
     public void setPixels(int[] pixels, int offset, int stride, int x, int y, int width, int height) {
         throw new RuntimeException("Dummy function");
-    }
-
-    @Override
-    public String getInstanceName() {
-        return mInstanceName;
-    }
-
-    @Override
-    public void setInstanceName(String instanceName) {
-        mInstanceName = instanceName;
     }
 
     public enum Config {ARGB_8888}

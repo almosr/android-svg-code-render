@@ -5,31 +5,35 @@ import android_svg_code_render.Initializer;
 import android_svg_code_render.OutputBuilder;
 
 /**
- * Created by racs on 2015.03.17..
+ * Simulated Android Canvas class
+ *
+ * @author Almos Rajnai
  */
-public class Canvas implements AndroidClass {
+public class Canvas extends AndroidClass {
     public static final int HAS_ALPHA_LAYER_SAVE_FLAG = 4;
     public static final int MATRIX_SAVE_FLAG = 1;
-    public String mInstanceName;
     private Matrix mMatrix;
     private int[] flagValues = {MATRIX_SAVE_FLAG, HAS_ALPHA_LAYER_SAVE_FLAG};
     private String[] flagNames = {"MATRIX_SAVE_FLAG", "HAS_ALPHA_LAYER_SAVE_FLAG"};
     private int mWidth;
     private int mHeight;
 
-    public Canvas(String instanceName, int width, int height) {
+    //This flag is set if the Canvas is the root class which is referring to all other classes in the output.
+    private boolean mRoot;
+
+    public Canvas(String instanceName, int width, int height, boolean isRoot) {
         //This constructor is used only by the setup code for the render method generation
         mInstanceName = instanceName;
-        //TODO: solve dynamic parameters for width and height
         mWidth = width;
         mHeight = height;
+        mRoot = isRoot;
     }
 
     public Canvas(Bitmap bitmap) {
         mWidth = bitmap.getWidth();
         mHeight = bitmap.getHeight();
 
-        Initializer.init(this, "%s", bitmap.getInstanceName());
+        Initializer.init(this, "%s", bitmap.getInstanceName(this));
     }
 
     public int getWidth() {
@@ -54,19 +58,19 @@ public class Canvas implements AndroidClass {
 
     public void setMatrix(Matrix matrix) {
         mMatrix = matrix;
-        OutputBuilder.appendMethodCall(this, "setMatrix", "%s", matrix.getInstanceName());
+        OutputBuilder.appendMethodCall(this, "setMatrix", "%s", matrix.getInstanceName(this));
     }
 
     public void drawPath(Path path, Paint fillPaint) {
-        OutputBuilder.appendMethodCall(this, "drawPath", "%s, %s", path.getInstanceName(), fillPaint.getInstanceName());
+        OutputBuilder.appendMethodCall(this, "drawPath", "%s, %s", path.getInstanceName(this), fillPaint.getInstanceName(this));
     }
 
     public void concat(Matrix matrix) {
-        OutputBuilder.appendMethodCall(this, "concat", "%s", matrix.getInstanceName());
+        OutputBuilder.appendMethodCall(this, "concat", "%s", matrix.getInstanceName(this));
         //Simulate concatenation
         if (matrix != null) {
             mMatrix = new Matrix(Initializer.generateInstanceName(Matrix.class));
-            OutputBuilder.append("Matrix %s = %s.getMatrix();", mMatrix.getInstanceName(), getInstanceName());
+            OutputBuilder.append(mMatrix, "Matrix %s = %s.getMatrix();", mMatrix.getInstanceName(this), getInstanceName(this));
         }
     }
 
@@ -84,15 +88,15 @@ public class Canvas implements AndroidClass {
     }
 
     public void drawBitmap(Bitmap maskedContent, float left, float top, Paint paint) {
-        OutputBuilder.appendMethodCall(this, "drawBitmap", "%ff, %ff, %s", left, top, paint.getInstanceName());
+        OutputBuilder.appendMethodCall(this, "drawBitmap", "%ff, %ff, %s", left, top, paint.getInstanceName(this));
     }
 
     public void drawText(String text, float x, float y, Paint paint) {
-        OutputBuilder.appendMethodCall(this, "drawText", "\"%s\", %ff, %ff, %s", text, x, y, paint.getInstanceName());
+        OutputBuilder.appendMethodCall(this, "drawText", "\"%s\", %ff, %ff, %s", text, x, y, paint.getInstanceName(this));
     }
 
     public void drawTextOnPath(String text, Path path, float x, float y, Paint paint) {
-        OutputBuilder.appendMethodCall(this, "drawTextOnPath", "\"%s\", %s, %ff, %ff, %s", text, paint.getInstanceName(), x, y, paint.getInstanceName());
+        OutputBuilder.appendMethodCall(this, "drawTextOnPath", "\"%s\", %s, %ff, %ff, %s", text, paint.getInstanceName(this), x, y, paint.getInstanceName(this));
     }
 
     public void clipRect(float left, float top, float right, float bottom) {
@@ -104,7 +108,7 @@ public class Canvas implements AndroidClass {
     }
 
     public void clipPath(Path clipPath) {
-        OutputBuilder.appendMethodCall(this, "clipPath", "%s", clipPath.getInstanceName());
+        OutputBuilder.appendMethodCall(this, "clipPath", "%s", clipPath.getInstanceName(this));
     }
 
     public void save(int saveFlags) {
@@ -116,12 +120,8 @@ public class Canvas implements AndroidClass {
     }
 
     @Override
-    public String getInstanceName() {
-        return mInstanceName;
-    }
-
-    @Override
-    public void setInstanceName(String instanceName) {
-        mInstanceName = instanceName;
+    public boolean isUsed() {
+        //Root canvas instamce must not be removed
+        return mRoot || super.isUsed();
     }
 }
