@@ -5,6 +5,8 @@ import com.caverock.androidsvg.SVG;
 import com.caverock.androidsvg.SVGParseException;
 
 import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 import java.util.Locale;
 
@@ -30,6 +32,7 @@ public class Main {
     private static String sOutFileName;
     private static String sPackageName;
     private static String sClassName;
+    private static String sTemplate;
 
     public static void main(String[] args) {
 
@@ -47,7 +50,7 @@ public class Main {
         }
 
         try {
-            saveOutput(sOutFileName, OutputBuilder.getResult(sSimpleInputFileName, FILE_TEMPLATE, sPackageName, sClassName));
+            saveOutput(sOutFileName, OutputBuilder.getResult(sSimpleInputFileName, sTemplate, sPackageName, sClassName));
         } catch (FileNotFoundException e) {
             error(e, "Error while saving result");
         }
@@ -56,7 +59,7 @@ public class Main {
     private static void extractParameters(String[] args) {
         //TODO: proper parsing of the command line parameters
 
-        if (args.length < 1 || args.length > 3) {
+        if (args.length < 1 || args.length > 5) {
             printHelp();
             error("Wrong arguments");
         }
@@ -77,6 +80,16 @@ public class Main {
         sOutFileName = sClassName + ".java";
         if (args.length > 3) {
             sOutFileName = args[3];
+        }
+
+        sTemplate = FILE_TEMPLATE;
+        if (args.length > 4) {
+            try {
+                byte[] encoded = Files.readAllBytes(Paths.get(args[4]));
+                sTemplate = new String(encoded);
+            } catch (IOException e) {
+                throw new RuntimeException("Error while reading template file", e);
+            }
         }
     }
 
@@ -105,7 +118,7 @@ public class Main {
 
     private static void printHelp() {
         System.out.println(String.format("android-svg-code-render v%s (%s)", Version.FULL, new SimpleDateFormat("dd/mm/yyyy HH:mm").format(Version.BUILD_TIME)));
-        System.out.println("Usage: android-svg-code-render inputfile.svg <package name> <class name> <outputfile.java>\n");
+        System.out.println("Usage: android-svg-code-render inputfile.svg <package name> <class name> <outputfile.java> <template file>\n");
     }
 
     public static void error(String msg, Object... params) {
