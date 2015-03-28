@@ -14,13 +14,21 @@ import java.util.Locale;
  * @author Almos Rajnai
  */
 public class Main {
+    public static final String CANVAS_PARAMETER_NAME = "canvas";
+
+    private static final String FILE_TEMPLATE =
+            "package vector_render;\n\n" +
+                    "%s\n" +                        //Imports
+                    "public class %s {\n" +         //Class name
+                    "    public static void render(Canvas " + CANVAS_PARAMETER_NAME + ", Integer width, Integer height) {\n" +
+                    "        canvas.scale(width, height);\n" +
+                    "%s" +                          //Generated source
+                    "    }\n}\n";
 
     private static String sInputFileName;
     private static String sSimpleInputFileName;
     private static String sOutFileName;
-    private static String sPackageName;
     private static String sClassName;
-    private static String sMethodName;
 
     public static void main(String[] args) {
 
@@ -38,7 +46,7 @@ public class Main {
         }
 
         try {
-            saveOutput(sOutFileName, OutputBuilder.getResult(sSimpleInputFileName, sPackageName, sClassName, sMethodName));
+            saveOutput(sOutFileName, OutputBuilder.getResult(sSimpleInputFileName, FILE_TEMPLATE, sClassName));
         } catch (FileNotFoundException e) {
             error(e, "Error while saving result");
         }
@@ -47,7 +55,7 @@ public class Main {
     private static void extractParameters(String[] args) {
         //TODO: proper parsing of the command line parameters
 
-        if (args.length < 1 || args.length > 5) {
+        if (args.length < 1 || args.length > 3) {
             printHelp();
             error("Wrong arguments");
         }
@@ -55,24 +63,14 @@ public class Main {
         sInputFileName = args[0];
         sSimpleInputFileName = new File(sInputFileName).getName();
 
-        sPackageName = "svgrenderpackage";
+        sClassName = "VectorRender_" + sInputFileName.split(".svg")[0];
         if (args.length > 1) {
-            sPackageName = args[1];
-        }
-
-        sClassName = "SvgRenderClass_" + sInputFileName.split(".svg")[0];
-        if (args.length > 2) {
-            sClassName = args[2];
-        }
-
-        sMethodName = "render";
-        if (args.length > 3) {
-            sMethodName = args[3];
+            sClassName = args[1];
         }
 
         sOutFileName = sClassName + ".java";
-        if (args.length > 4) {
-            sOutFileName = args[4];
+        if (args.length > 2) {
+            sOutFileName = args[2];
         }
     }
 
@@ -88,7 +86,7 @@ public class Main {
         svg.setDocumentHeight(1.0f);
 
         //Main canvas object is created with the static instance name from the method parameters
-        svg.renderToCanvas(new Canvas(OutputBuilder.CANVAS_PARAMETER_NAME, 1, 1, true));
+        svg.renderToCanvas(new Canvas(CANVAS_PARAMETER_NAME, 1, 1, true));
 
         is.close();
     }
@@ -101,7 +99,7 @@ public class Main {
 
     private static void printHelp() {
         System.out.println(String.format("android-svg-code-render v%s (%s)", Version.FULL, new SimpleDateFormat("dd/mm/yyyy HH:mm").format(Version.BUILD_TIME)));
-        System.out.println("Usage: android-svg-code-render inputfile.svg <package name> <class name> <method name> <outputfile.java>\n");
+        System.out.println("Usage: android-svg-code-render inputfile.svg <class name> <outputfile.java>\n");
     }
 
     public static void error(String msg, Object... params) {

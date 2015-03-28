@@ -8,8 +8,6 @@ import java.util.*;
  * @author Almos Rajnai
  */
 public class OutputBuilder {
-    public static final String CANVAS_PARAMETER_NAME = "canvas";
-
     private static ArrayList<OutputItem> sOutput;
     private static SortedSet<String> sImports;
     private static HashSet<AndroidClass> sInstances;
@@ -20,16 +18,14 @@ public class OutputBuilder {
         sInstances = new HashSet<>();
     }
 
-    public static String getResult(String fileName, String packageName, String className, String methodName) {
+    public static String getResult(String fileName, String fileTemplate, String className) {
 
         optimize();
 
         StringBuilder str = new StringBuilder(10000);
 
-        str.append(String.format("package %s;\n\n", packageName));
-
         str.append("/**\n");
-        str.append(" * Converted SVG file into Java code\n");
+        str.append(" * This file was created by converting SVG file into Java code\n");
         str.append(String.format(" * Original file name: %s\n", fileName));
         str.append(String.format(" * Conversion date: %s\n", new Date().toString()));
         str.append(" *\n");
@@ -41,18 +37,12 @@ public class OutputBuilder {
         //we need the Canvas class as a parameter for the render method
         addImport(android.graphics.Canvas.class);
 
+        StringBuilder strImports = new StringBuilder();
         for (String include : sImports) {
-            str.append(String.format("import %s;\n", include));
+            strImports.append(String.format("import %s;\n", include));
         }
 
-        str.append("\n");
-
-        //TODO: implement file template instead of hard-coded file structure
-        str.append(String.format("public class %s {\n", className));
-        str.append(String.format("    public static void %s(Canvas %s, Integer width, Integer height) {\n", methodName, CANVAS_PARAMETER_NAME));
-        str.append("        canvas.scale(width, height);\n");
-        str.append(mergeOutput());
-        str.append("    }\n}\n");
+        str.append(String.format(fileTemplate, strImports, className, mergeOutput()));
 
         return str.toString();
     }
