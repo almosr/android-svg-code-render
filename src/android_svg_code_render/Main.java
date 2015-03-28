@@ -20,7 +20,7 @@ public class Main {
             "package vector_render;\n\n" +
                     "%s\n" +                        //Imports
                     "public class %s {\n" +         //Class name
-                    "    public static void render(Canvas " + CANVAS_PARAMETER_NAME + ", Integer width, Integer height) {\n" +
+                    "    public static void render(Canvas " + CANVAS_PARAMETER_NAME + ", int width, int height) {\n" +
                     "        canvas.scale(width, height);\n" +
                     "%s" +                          //Generated source
                     "    }\n}\n";
