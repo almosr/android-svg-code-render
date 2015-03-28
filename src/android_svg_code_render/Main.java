@@ -17,7 +17,7 @@ public class Main {
     public static final String CANVAS_PARAMETER_NAME = "canvas";
 
     private static final String FILE_TEMPLATE =
-            "package vector_render;\n\n" +
+            "package %s;\n\n" +                     //Package name
                     "%s\n" +                        //Imports
                     "public class %s {\n" +         //Class name
                     "    public static void render(Canvas " + CANVAS_PARAMETER_NAME + ", int width, int height) {\n" +
@@ -28,6 +28,7 @@ public class Main {
     private static String sInputFileName;
     private static String sSimpleInputFileName;
     private static String sOutFileName;
+    private static String sPackageName;
     private static String sClassName;
 
     public static void main(String[] args) {
@@ -46,7 +47,7 @@ public class Main {
         }
 
         try {
-            saveOutput(sOutFileName, OutputBuilder.getResult(sSimpleInputFileName, FILE_TEMPLATE, sClassName));
+            saveOutput(sOutFileName, OutputBuilder.getResult(sSimpleInputFileName, FILE_TEMPLATE, sPackageName, sClassName));
         } catch (FileNotFoundException e) {
             error(e, "Error while saving result");
         }
@@ -63,14 +64,19 @@ public class Main {
         sInputFileName = args[0];
         sSimpleInputFileName = new File(sInputFileName).getName();
 
-        sClassName = "VectorRender_" + sInputFileName.split(".svg")[0];
+        sPackageName = "vector_render";
         if (args.length > 1) {
-            sClassName = args[1];
+            sPackageName = args[1];
+        }
+
+        sClassName = "VectorRender_" + sInputFileName.split(".svg")[0];
+        if (args.length > 2) {
+            sClassName = args[2];
         }
 
         sOutFileName = sClassName + ".java";
-        if (args.length > 2) {
-            sOutFileName = args[2];
+        if (args.length > 3) {
+            sOutFileName = args[3];
         }
     }
 
@@ -99,7 +105,7 @@ public class Main {
 
     private static void printHelp() {
         System.out.println(String.format("android-svg-code-render v%s (%s)", Version.FULL, new SimpleDateFormat("dd/mm/yyyy HH:mm").format(Version.BUILD_TIME)));
-        System.out.println("Usage: android-svg-code-render inputfile.svg <class name> <outputfile.java>\n");
+        System.out.println("Usage: android-svg-code-render inputfile.svg <package name> <class name> <outputfile.java>\n");
     }
 
     public static void error(String msg, Object... params) {

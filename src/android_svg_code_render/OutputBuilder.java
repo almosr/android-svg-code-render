@@ -18,7 +18,7 @@ public class OutputBuilder {
         sInstances = new HashSet<>();
     }
 
-    public static String getResult(String fileName, String fileTemplate, String className) {
+    public static String getResult(String fileName, String fileTemplate, String packageName, String className) {
 
         optimize();
 
@@ -42,7 +42,7 @@ public class OutputBuilder {
             strImports.append(String.format("import %s;\n", include));
         }
 
-        str.append(String.format(fileTemplate, strImports, className, mergeOutput()));
+        str.append(String.format(fileTemplate, packageName, strImports, className, mergeOutput()));
 
         return str.toString();
     }
