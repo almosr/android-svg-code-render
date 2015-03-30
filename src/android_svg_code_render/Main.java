@@ -117,7 +117,7 @@ public class Main {
     }
 
     private static void printHelp() {
-        System.out.println(String.format("android-svg-code-render v%s (%s)", Version.FULL, new SimpleDateFormat("dd/mm/yyyy HH:mm").format(Version.BUILD_TIME)));
+        System.out.println(String.format("android-svg-code-render v%s (%s)", Version.FULL, new SimpleDateFormat("dd/MM/yyyy HH:mm").format(Version.BUILD_TIME)));
         System.out.println("Usage: android-svg-code-render inputfile.svg <package name> <class name> <outputfile.java> <template file>\n");
     }
 
