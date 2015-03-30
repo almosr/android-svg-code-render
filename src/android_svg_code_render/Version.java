@@ -34,21 +34,29 @@ public class Version {
         }.getClass().getEnclosingClass();
         URL resource = currentClass.getResource(currentClass.getSimpleName() + ".class");
         if (resource != null) {
-            if (resource.getProtocol().equals("file")) {
-                try {
-                    d = new Date(new File(resource.toURI()).lastModified());
-                } catch (URISyntaxException ignored) {
+            switch (resource.getProtocol()) {
+                case "file":
+                    try {
+                        d = new Date(new File(resource.toURI()).lastModified());
+                    } catch (URISyntaxException ignored) {
+                    }
+                    break;
+
+                case "jar": {
+                    String path = resource.getPath();
+                    d = new Date(new File(path.substring(5, path.indexOf("!"))).lastModified());
+                    break;
                 }
-            } else if (resource.getProtocol().equals("jar")) {
-                String path = resource.getPath();
-                d = new Date(new File(path.substring(5, path.indexOf("!"))).lastModified());
-            } else if (resource.getProtocol().equals("zip")) {
-                String path = resource.getPath();
-                File jarFileOnDisk = new File(path.substring(0, path.indexOf("!")));
-                try (JarFile jf = new JarFile(jarFileOnDisk)) {
-                    ZipEntry ze = jf.getEntry(path.substring(path.indexOf("!") + 2));//Skip the ! and the /
-                    d = new Date(ze.getTime());
-                } catch (IOException | RuntimeException ignored) {
+
+                case "zip": {
+                    String path = resource.getPath();
+                    File jarFileOnDisk = new File(path.substring(0, path.indexOf("!")));
+                    try (JarFile jf = new JarFile(jarFileOnDisk)) {
+                        ZipEntry ze = jf.getEntry(path.substring(path.indexOf("!") + 2));//Skip the ! and the /
+                        d = new Date(ze.getTime());
+                    } catch (IOException | RuntimeException ignored) {
+                    }
+                    break;
                 }
             }
         }
