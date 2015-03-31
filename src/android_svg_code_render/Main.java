@@ -22,8 +22,9 @@ public class Main {
             "package %s;\n\n" +                     //Package name
                     "%s\n" +                        //Imports
                     "public class %s {\n" +         //Class name
+                    "\n%s\n" +                      //Dimension constants
                     "    public static void render(Canvas " + CANVAS_PARAMETER_NAME + ", int width, int height) {\n" +
-                    "        canvas.scale(width, height);\n" +
+                    "        canvas.scale(width / WIDTH, height / HEIGHT);\n" +
                     "%s" +                          //Generated source
                     "    }\n}\n";
 
@@ -98,11 +99,8 @@ public class Main {
 
         SVG svg = SVG.getFromInputStream(is);
 
-        //Preset scaling: document is enforced into a 1.0x1.0 pixel square,
-        //will be scaled to the right height at rendering
-        svg.setRenderDPI(1.0f);
-        svg.setDocumentWidth(1.0f);
-        svg.setDocumentHeight(1.0f);
+        OutputBuilder.sWidth = svg.getDocumentWidth();
+        OutputBuilder.sHeight = svg.getDocumentHeight();
 
         //Main canvas object is created with the static instance name from the method parameters
         svg.renderToCanvas(new Canvas(CANVAS_PARAMETER_NAME, 1, 1, true));

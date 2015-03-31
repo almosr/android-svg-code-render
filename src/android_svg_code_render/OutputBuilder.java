@@ -12,6 +12,9 @@ public class OutputBuilder {
     private static SortedSet<String> sImports;
     private static HashSet<AndroidClass> sInstances;
 
+    public static float sWidth;
+    public static float sHeight;
+
     public static void init() {
         sOutput = new ArrayList<>();
         sImports = new TreeSet<>();
@@ -42,7 +45,11 @@ public class OutputBuilder {
             strImports.append(String.format("import %s;\n", include));
         }
 
-        str.append(String.format(fileTemplate, packageName, strImports, className, mergeOutput()));
+        String strDimensions = String.format(
+                "    public static final float WIDTH = %ff;\n" +
+                        "    public static final float HEIGHT = %ff;\n", sWidth, sHeight);
+
+        str.append(String.format(fileTemplate, packageName, strImports, className, strDimensions, mergeOutput()));
 
         return str.toString();
     }
