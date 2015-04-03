@@ -112,6 +112,8 @@ public class OutputBuilder {
     }
 
     private static void optimize() {
+
+        //Remove instances which will not be used as a reference by the drawing operations (canvas)
         boolean wasChange;
         do {
             wasChange = false;
@@ -121,6 +123,45 @@ public class OutputBuilder {
             }
 
         } while (wasChange);
+
+        //Remove Canvas.save and Canvas.Restore in a row, these are useless without doing anything in between the two
+        //TODO: improve canvas.save/restore optimization, take account those calls only which are changing the saved properties of the canvas
+        Stack<Integer> saveStack = new Stack<>();
+        for (int i = 0; i < sOutput.size(); ) {
+            String item = sOutput.get(i).getOutput().trim();
+            if (item.equals("canvas.save();")) {
+                saveStack.push(i);
+                i++;
+            } else if (item.equals("canvas.restore();") && !saveStack.empty()) {
+                int index = saveStack.pop();
+
+                if (index != -1) {
+                    //Remove current restore call
+                    sOutput.remove(i);
+
+                    //Remove matching save call
+                    sOutput.remove(index);
+
+                    //Step one item back, we have removed two items, so this will be simple incrementing by one item at the end
+                    i--;
+                } else {
+                    //This is a legit save-restore pair: skip removing
+                    i++;
+                }
+            } else if (item.startsWith("canvas.")) {
+                if (!saveStack.empty()) {
+                    //Current item is interaction with the canvas: we cannot remove any previous save,
+                    //let's mark the save on the top by replacing its index with -1
+                    saveStack.pop();
+                    saveStack.push(-1);
+                }
+
+                i++;
+            } else {
+                //Nothing special, go on
+                i++;
+            }
+        }
     }
 
     private static String mergeOutput() {
