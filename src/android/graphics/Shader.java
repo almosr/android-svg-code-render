@@ -19,7 +19,7 @@ public class Shader extends AndroidClass {
 
     public void setLocalMatrix(Matrix localM) {
         mLocalMatrix = localM;
-        OutputBuilder.appendMethodCall(this, "setLocalMatrix", "%s", localM.getInstanceName(this));
+        OutputBuilder.appendMethodCall(this, OutputBuilder.dependencyList(this, localM), "setLocalMatrix", "%s", localM.getInstanceName(this));
     }
 
     public enum TileMode {

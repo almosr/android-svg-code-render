@@ -50,17 +50,17 @@ public abstract class AndroidClass {
         return wasChange;
     }
 
-    public void init() {
-        init(null);
+    public void init(AndroidClass[] dependencies) {
+        init(dependencies, null);
     }
 
-    public void init(String parameters, Object... objects) {
+    public void init(AndroidClass[] dependencies, String parameters, Object... objects) {
         setInstanceName(generateInstanceName(getClass()));
 
         OutputBuilder.addImport(getClass());
 
         String simpleClassName = getClass().getSimpleName();
-        OutputBuilder.append(this, "%s %s = new %s(%s);",
+        OutputBuilder.append(this, this, dependencies, "%s %s = new %s(%s);",
                 simpleClassName,
                 getInstanceName(null),
                 simpleClassName,

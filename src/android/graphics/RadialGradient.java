@@ -12,7 +12,7 @@ public class RadialGradient extends Shader {
     public RadialGradient(float cx, float cy, float r, int[] colours, float[] positions, TileMode tileMode) {
         OutputBuilder.addImport(Shader.class);
 
-        init("%ff, %ff, %ff, %s, %s, %s",
+        init(null, "%ff, %ff, %ff, %s, %s, %s",
                 cx, cy, r,
                 OutputBuilder.createArrayParameter(colours, true),
                 OutputBuilder.createArrayParameter(positions),

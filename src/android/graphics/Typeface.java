@@ -36,7 +36,7 @@ public class Typeface extends AndroidClass {
         OutputBuilder.addImport(Typeface.class);
 
         String styleFlags = OutputBuilder.splitFlags(typefaceStyle, "Typeface.", styleValues, styleNames);
-        OutputBuilder.append(newTypeface, "Typeface %s = Typeface.create(%s, %s);", newTypeface.mInstanceName, family.getInstanceName(newTypeface), styleFlags);
+        OutputBuilder.append(newTypeface, newTypeface, OutputBuilder.dependencyList(family), "Typeface %s = Typeface.create(%s, %s);", newTypeface.mInstanceName, family.getInstanceName(newTypeface), styleFlags);
 
         return newTypeface;
 

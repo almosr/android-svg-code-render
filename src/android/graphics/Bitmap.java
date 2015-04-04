@@ -23,7 +23,7 @@ public class Bitmap extends AndroidClass {
 
     public static Bitmap createBitmap(int width, int height, Config bitmapConfig) {
         Bitmap bitmap = new Bitmap(width, height, bitmapConfig);
-        OutputBuilder.append(bitmap, "Bitmap %s = Bitmap.createBitmap(%d, %d, Config.%s);", bitmap.getInstanceName(null), width, height, bitmapConfig.name());
+        OutputBuilder.append(bitmap, bitmap, null, "Bitmap %s = Bitmap.createBitmap(%d, %d, Config.%s);", bitmap.getInstanceName(null), width, height, bitmapConfig.name());
         return bitmap;
     }
 

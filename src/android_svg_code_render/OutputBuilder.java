@@ -8,9 +8,12 @@ import java.util.*;
  * @author Almos Rajnai
  */
 public class OutputBuilder {
+    private static final int METHOD_SIZE_THRESHOLD = 5000;
+
     private static ArrayList<OutputItem> sOutput;
     private static SortedSet<String> sImports;
     private static HashSet<AndroidClass> sInstances;
+    private static int sSubMethodCounter;
 
     public static float sWidth;
     public static float sHeight;
@@ -19,11 +22,14 @@ public class OutputBuilder {
         sOutput = new ArrayList<>();
         sImports = new TreeSet<>();
         sInstances = new HashSet<>();
+        sSubMethodCounter = 0;
     }
 
     public static String getResult(String fileName, String fileTemplate, String packageName, String className) {
 
         optimize();
+
+        splitMethod();
 
         StringBuilder str = new StringBuilder(10000);
 
@@ -54,21 +60,21 @@ public class OutputBuilder {
         return str.toString();
     }
 
-    public static void append(AndroidClass instance, String text, Object... params) {
-        sOutput.add(new OutputItem(instance, String.format("        " + text + "\n", params)));
+    public static void append(AndroidClass instance, AndroidClass instanceCreated, AndroidClass[] dependencies, String text, Object... params) {
+        sOutput.add(new OutputItem(instance, instanceCreated, dependencies, String.format("        " + text + "\n", params)));
 
         sInstances.add(instance);
     }
 
-    public static void appendMethodCall(AndroidClass instance, String methodName) {
-        appendMethodCall(instance, methodName, null);
+    public static void appendMethodCall(AndroidClass instance, AndroidClass[] dependencies, String methodName) {
+        appendMethodCall(instance, dependencies, methodName, null);
     }
 
-    public static void appendMethodCall(AndroidClass instance, String methodName, String parameters, Object... objects) {
+    public static void appendMethodCall(AndroidClass instance, AndroidClass[] dependencies, String methodName, String parameters, Object... objects) {
         if (parameters == null) {
             parameters = "";
         }
-        append(instance, String.format("%s.%s(%s);", instance.getInstanceName(null), methodName, String.format(parameters, objects)));
+        append(instance, null, dependencies, String.format("%s.%s(%s);", instance.getInstanceName(null), methodName, String.format(parameters, objects)));
     }
 
     public static String splitFlags(int flags, String prefix, int[] values, String[] names) {
@@ -109,6 +115,10 @@ public class OutputBuilder {
 
     public static void addImport(Class clazz) {
         sImports.add(clazz.getName().replace("$", "."));
+    }
+
+    public static AndroidClass[] dependencyList(AndroidClass... dependencies) {
+        return dependencies;
     }
 
     private static void optimize() {
@@ -164,11 +174,84 @@ public class OutputBuilder {
         }
     }
 
+    private static void splitMethod() {
+        //Check if the output buffer contains more items than the method size threshold,
+        //if not then there is nothing to adjust
+        if (sOutput.size() < METHOD_SIZE_THRESHOLD) {
+            return;
+        }
+
+        //Split method into smaller chunks which will fit into 64k compiled bytecode size
+        ArrayList<OutputItem> items = new ArrayList<>(sOutput.subList(0, METHOD_SIZE_THRESHOLD));
+        for (int i = METHOD_SIZE_THRESHOLD; i < sOutput.size(); i += METHOD_SIZE_THRESHOLD) {
+
+            //Get all dependencies of the remaining part of the code
+            List<AndroidClass> dependencies = scanDependencies(i);
+
+            //Sort dependencies according to their instance name
+            Collections.sort(dependencies, new Comparator<AndroidClass>() {
+                @Override
+                public int compare(AndroidClass o1, AndroidClass o2) {
+                    return o1.getInstanceName(null).compareTo(o2.getInstanceName(null));
+                }
+            });
+
+            //Turn dependencies into method parameter and argument list
+            String parameters = "";
+            String arguments = "";
+            for (int d = 0; d < dependencies.size(); d++) {
+                AndroidClass instance = dependencies.get(d);
+                parameters += instance.getInstanceName(null);
+                arguments += String.format("%s %s", instance.getClass().getSimpleName(), instance.getInstanceName(null));
+                if (d < dependencies.size() - 1) {
+                    parameters += ", ";
+                    arguments += ", ";
+                }
+            }
+
+            //Insert daisy-chain method calling and new method definition before the next block of code
+            String line = String.format("        render_%d(%s);\n    }\n\n    private static void render_%1$d(%s) {\n", sSubMethodCounter++, parameters, arguments);
+            items.add(new OutputItem(null, null, null, line));
+
+            //Copy over the code block (or remaining part of it)
+            items.addAll(sOutput.subList(i, Math.min(i + METHOD_SIZE_THRESHOLD, sOutput.size())));
+        }
+
+        //New list will be replacing the previous output list
+        sOutput = items;
+    }
+
+    private static List<AndroidClass> scanDependencies(int start) {
+        HashSet<AndroidClass> createdInstances = new HashSet<>();
+        HashSet<AndroidClass> depencencies = new HashSet<>();
+        for (int j = start; j < sOutput.size(); j++) {
+            //Gather created instances from output instances
+            OutputItem item = sOutput.get(j);
+
+            //Collect created instances into a hash set
+            if (item.getInstanceCreated() != null) {
+                createdInstances.add(item.getInstanceCreated());
+            }
+
+            if (item.getDependencies() != null) {
+                //Check each dependency if it was created in the current block
+                for (AndroidClass dependency : item.getDependencies()) {
+                    if (!createdInstances.contains(dependency)) {
+                        //Not created here, add as external depencency
+                        depencencies.add(dependency);
+                    }
+                }
+            }
+        }
+
+        return new ArrayList<>(depencencies);
+    }
+
     private static String mergeOutput() {
         StringBuilder output = new StringBuilder(10000);
 
         for (OutputItem outputItem : sOutput) {
-            if (outputItem.getInstance().isUsed()) {
+            if (outputItem.getInstance() == null || outputItem.getInstance().isUsed()) {
                 output.append(outputItem.getOutput());
             }
         }
@@ -178,10 +261,14 @@ public class OutputBuilder {
 
     private static class OutputItem {
         private final AndroidClass mInstance;
+        private AndroidClass[] mDependencies;
         private final String mOutput;
+        private final AndroidClass mInstanceCreated;
 
-        public OutputItem(AndroidClass instance, String output) {
+        public OutputItem(AndroidClass instance, AndroidClass instanceCreated, AndroidClass[] dependencies, String output) {
             mInstance = instance;
+            mInstanceCreated = instanceCreated;
+            mDependencies = dependencies;
             mOutput = output;
         }
 
@@ -191,6 +278,14 @@ public class OutputBuilder {
 
         public String getOutput() {
             return mOutput;
+        }
+
+        public AndroidClass getInstanceCreated() {
+            return mInstanceCreated;
+        }
+
+        public AndroidClass[] getDependencies() {
+            return mDependencies;
         }
     }
 }
