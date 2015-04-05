@@ -199,13 +199,24 @@ public class OutputBuilder {
             //Turn dependencies into method parameter and argument list
             String parameters = "";
             String arguments = "";
+            HashSet<String> processed = new HashSet<>();
             for (int d = 0; d < dependencies.size(); d++) {
                 AndroidClass instance = dependencies.get(d);
-                parameters += instance.getInstanceName(null);
-                arguments += String.format("%s %s", instance.getClass().getSimpleName(), instance.getInstanceName(null));
-                if (d < dependencies.size() - 1) {
-                    parameters += ", ";
-                    arguments += ", ";
+                String instanceName = instance.getInstanceName(null);
+
+                //This is a workaround for the Paint instance optimization trick:
+                //sometimes a Paint instance is referring to a parent instance instead, when the instance name is read
+                //then it returns the name of the parent.
+                //Since both Paint instance are unique the name would be duplicated in the method header,
+                //so we filter out the duplication by keeping track of the processed instances by name and not by instance reference.
+                if (!processed.contains(instanceName)) {
+                    processed.add(instanceName);
+                    parameters += instanceName;
+                    arguments += String.format("%s %s", instance.getClass().getSimpleName(), instanceName);
+                    if (d < dependencies.size() - 1) {
+                        parameters += ", ";
+                        arguments += ", ";
+                    }
                 }
             }
 
