@@ -24,8 +24,10 @@ public class Main {
                     "public class %s {\n" +         //Class name
                     "\n%s\n" +                      //Dimension constants
                     "    public static void render(Canvas " + CANVAS_PARAMETER_NAME + ", int width, int height) {\n" +
+                    "        canvas.save();\n" +
                     "        canvas.scale(width / WIDTH, height / HEIGHT);\n" +
                     "%s" +                          //Generated source
+                    "        canvas.restore();\n" +
                     "    }\n}\n";
 
     private static String sInputFileName;
