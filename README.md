@@ -1,9 +1,9 @@
 # android-svg-code-render
 
-## What is the meaning of this!?
+## Introduction
 
-The purpose of this project is creating a (Java based) tool for converting SVG formatted vector graphic files into Java source code.
-The generated files can be used for rendering the content of the SVG file directly into a Canvas object under Android, thus eliminating the rather slow and resouce consuming interpretation of the SVG file structure.
+The purpose of this project is creating a (Java based) tool for converting SVG formatted vector graphic files into Java source code which can be used in Android apps.
+The generated files are rendering the content of the SVG file directly into a Canvas object under Android, thus eliminating the rather slow and resource consuming interpretation of the SVG file structure.
 
 Original idea is coming from a blog post from **Bartosz Wesołowski**:
 http://androiddreamrevised.blogspot.co.nz/2014/06/transforming-svg-images-into-android.html
@@ -25,12 +25,12 @@ Arguments for the executable are:
 * **outputfile.java** (optional) - output file path/name (default: "VectorRender_*inputfilename*")
 * **template file** (optional) - template Java source file which will be used for generating the output (default: built-in template)
  
-In the current release the argument parsing is rather rudamentary, if you want to specify an optional argument then you have to specify the arguments before that desired one. The order of the arguments cannot change.
+In the current release the argument parsing is rather rudimentary, if you want to specify an optional argument then you have to specify all the arguments before that desired one. The order of the arguments cannot change. (See issue #55.)
 
 ### Output file
 
-The output will be a Java source file which can be used directly in your Android app without any additional library and without the source SVG file itself.
-The file contains only the relevant operations which are necessary for drawing the SVG file to a Canvas object.
+The output will be a Java source file which can be used directly in your Android app without any additional library and without the original source SVG file itself.
+The file contains only the relevant operations which are necessary for drawing the SVG file to a Canvas object. (More or less, some optimizations are still needed, see issue #57.)
 In the built-in template there will be one static method, called `render`. It takes three arguments: the target canvas, the width and the height of the output (bounding box) in pixels.
 
 ### Template file
@@ -38,7 +38,7 @@ In the built-in template there will be one static method, called `render`. It ta
 The exact format of the embedding class and the method header can be specified through a template file.
 An example template file is included in the *templates* folder which changes the output to create a `Picture` instance out of the vectors instead of rendering the vectors to a `Canvas`. (Which can be used as a `PictureDrawable` input for any standard Android UI component.)
 
-The template file can be used for very tricky things. For example I added an interface implementation to the embedding class, so I am able to call the render method in a generic way for all the vector rendering objects I have in my app.
+The template file can be used for very tricky things. For example I added an interface implementation to the embedding class, so I am able to call the render method in a generic way for all vector rendering objects I have in my app.
 
 But you can also tweak the canvas by applying a `Matrix` instance on it which is created out of the passed in arguments, so you can scale, rotate, mirror or pretty much do whatever you want with your vectors while they are rendered.
 
@@ -48,23 +48,26 @@ The format of the template file is pretty loose: it must be a text file with fou
 
 1. package name
 2. the imports for the used classes
-2. class name
-3. the body of the rendering code
+3. class name
+4. two `float` constants, called `WIDTH` and `HEIGHT`, which contain the width and the height of the source SVG document
+5. the body of the rendering code
 
-The only constraint around the rendering code that it expects a local variable: the target `Canvas` instance, named as `canvas`. Everything else is free-form in the template.
+The only constraint around the rendering code is it expects a local variable: the target `Canvas` instance, named as `canvas`. Everything else is free-form in the template.
+(See related issue #58.)
 
 ## Why would this be useful to anybody?
 
-This tool is not useful for everybody and for any random SVG rendering. Obviously, if your SVG files are not static (for example downloaded from somewhere) then you won't be able to convert them before building your app.
+This tool might not be useful for everybody and for any random SVG rendering. Obviously, if your SVG files are not static (for example downloaded from somewhere) then you won't be able to convert them before building your app.
 
 On the other hand, if you need a flexible way of rendering complex vectors (for example a UI for a game, like in my case) and you are concerned about the speed because there are plenty of files to render then this is the solution you might be looking for.
-Before I converted all the SVG files to Java code I had to add a *"Loading"* screen to my game because it took a few seconds to render the vectors into bitmaps. Now, there is no need for that screen anymore, the rendering is blazingly fast. (No wonder, there is no need for interpreting a massive XML structure.)
+Before I converted all the SVG files to Java code I had to add a *"Loading"* screen to my game because it took a few seconds to render the vectors into bitmaps before I was able to use them on the screen. Now, there is no need for that screen any more, the rendering is blazingly fast. (No wonder, there is no need for interpreting a massive XML structure.)
 
 Other benefits of using Java code over SVG file (or other vector format):
 
-* You can change the rendering code manually or automatically in any way you like.
-* You can add hooks into the code for passing in dynamic data (like replacing colors or text at rendering time).
-* It is nearly impossible to extract the original file out of your code (so, nobody will steal your precious SVG images).
+* It consumes significantly less memory: no need to load the SVG file, the SVG parser eats up lots of memory, tons of useless objects were created while the image is rendered simply because the render library cannot predict the need for the various drawing classes. All of these problems are eliminated by the static rendering code.
+* You can change the rendering code manually or automatically in any way you like. It is just a Java source code after all.
+* You can add hooks into the code for passing in dynamic data (like replacing colours or text at rendering time). (Manually for now, but see issue #56.)
+* It is nearly impossible to extract the original file out of your compiled app (so, nobody will steal your precious SVG images).
 * Have I mentioned that it is FAST? You can even render the vectors in real time... zoom in/out, rotate, dynamic scaling UI, supporting any random screen resolution, this is all possible without quality loss.
 * Probably vector rendering is consuming much less memory than bitmaps (I haven't done any benchmarking, and it depends on the actual file, but it is highly possible).
 
@@ -74,12 +77,12 @@ There are downsides too... Keep them in mind!
 
 The rendering code increases the size of the executable significantly, sometimes extremely. It might mean that your app runs slowly in general because the code base is significantly larger and the execution runs out of the buffer too often. (Although, this is more likely just a theoretical problem, I have not experienced such issues.)
 
-Compiling of your codebase will be much slower, the compiler must chew through all the vector rendering classes. Dexing will slow down too.
+Compiling of your code base will be much slower, the compiler must chew through all the vector rendering classes. Dexing will slow down too.
+There is a workaround I have figured out for this issue: you can put all the rendering classes into a separate library (or into a module in Android Studio/Gradle) and include it in pre-compiled form. This won't slow down the app compiling every time.
 
 If you want to update the vector files then it is pretty much not possible without updating the app binary itself. While using SVG files you can implement a downloading process and replace the files even one-by-one whenever you want to.
 
-As it seems the generated code increases the size of the APK file more than the original SVG files. I haven't done any scientific experiments on this issue and it probably depends on the actual file content too, so this is just a mere warning.
-
+As it seems the generated code increases the size of the APK file more than the original SVG files. I haven't done any scientific experiments or benchmarking on this issue and it probably depends on the actual file content too, so this is just a mere warning.
 
 ## Unresolved issues
 
@@ -87,9 +90,7 @@ There are some issues which needed to be addressed sooner or later:
 
 * Probably not all SVG files will be converted successfully. If you find any files which are working with the original androidsvg library (see below), but doesn't work from the converted format or you get an exception while running the tool then get in touch with me.
 * Text rendering is most likely not working properly, I haven't tried too much, but it seems to be depending on the calculation of the width of the rendered text. This part is not implemented yet, don't be surprised too much if your vector file looks funny with text in it.
-* There is a hard limit built in into Java: the compiled bytecode of one method cannot be larger than 64kB. If your SVG file is elaborate enough then you might end up with hitting this limit. (You will see the error when you try to compile the outputted class.) This problem can be workarounded manually by splitting the rendering method into multiple methods. You can daisy-chain the methods by calling the next method from the current one and pass in some needed local variables with `Paint` and `Matrix` instances. This issue will be addressed in a later release.
-* The outputted code is not optimized too deeply. Some optimization was done by eliminating useless objects, but still an awful lot of unnecessary `Paint` and `Matrix` instances are created with no good reason. The original library is a bit too hasty with cloning these instances, probably it will be possible to eliminate these later on to save some memory and increase the performance even further.
-* It is not possible to get the pixel size of the original SVG file. This will be addressed also later on.
+* The outputted code is not optimized too deeply. Some optimization was done by eliminating useless objects, but still an awful lot of unnecessary `Paint` and `Matrix` instances are created with no good reason. The original library is a bit too hasty with cloning these instances, probably it will be possible to eliminate these later on to save some memory and increase the performance even further. (See issue #57.)
 
 ## Original source
 This project was built on the source code of the great androidsvg library from **Paul LeBeau**.
