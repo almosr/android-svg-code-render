@@ -1,5 +1,6 @@
 package android.graphics;
 
+import android.util.Log;
 import android_svg_code_render.AndroidClass;
 import android_svg_code_render.OutputBuilder;
 
@@ -9,6 +10,8 @@ import android_svg_code_render.OutputBuilder;
  * @author Almos Rajnai
  */
 public class Canvas extends AndroidClass {
+    private static final String TAG = Canvas.class.getName();
+
     public static final int HAS_ALPHA_LAYER_SAVE_FLAG = 4;
     public static final int MATRIX_SAVE_FLAG = 1;
     private Matrix mMatrix;
@@ -52,6 +55,13 @@ public class Canvas extends AndroidClass {
     }
 
     public Matrix getMatrix() {
+        if (mMatrix == null) {
+            Log.w(TAG, "Inner Matrix instance is not initialized yet when read from Canvas");
+
+            //Get Matrix instance from the real Canvas and use that instance
+            getMatrixInstanceFromCanvas();
+        }
+
         return mMatrix;
     }
 
@@ -68,9 +78,13 @@ public class Canvas extends AndroidClass {
         OutputBuilder.appendMethodCall(this, OutputBuilder.dependencyList(this, matrix), "concat", "%s", matrix.getInstanceName(this));
         //Simulate concatenation
         if (matrix != null) {
-            mMatrix = new Matrix(generateInstanceName(Matrix.class));
-            OutputBuilder.append(mMatrix, mMatrix, OutputBuilder.dependencyList(this), "Matrix %s = %s.getMatrix();", mMatrix.getInstanceName(this), getInstanceName(this));
+            getMatrixInstanceFromCanvas();
         }
+    }
+
+    private void getMatrixInstanceFromCanvas() {
+        mMatrix = new Matrix(generateInstanceName(Matrix.class));
+        OutputBuilder.append(mMatrix, mMatrix, OutputBuilder.dependencyList(this), "Matrix %s = %s.getMatrix();", mMatrix.getInstanceName(this), getInstanceName(this));
     }
 
     public void translate(float x, float y) {
