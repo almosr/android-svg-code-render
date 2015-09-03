@@ -109,11 +109,15 @@ public class Canvas extends AndroidClass {
     }
 
     public void drawText(String text, float x, float y, Paint paint) {
-        OutputBuilder.appendMethodCall(this, OutputBuilder.dependencyList(this, paint), "drawText", "%s, %ff, %ff, %s", findTextReplacement(text), x, y, paint.getInstanceName(this));
+        if (!text.isEmpty()) {
+            OutputBuilder.appendMethodCall(this, OutputBuilder.dependencyList(this, paint), "drawText", "%s, %ff, %ff, %s", findTextReplacement(text), x, y, paint.getInstanceName(this));
+        }
     }
 
     public void drawTextOnPath(String text, Path path, float x, float y, Paint paint) {
-        OutputBuilder.appendMethodCall(this, OutputBuilder.dependencyList(this, paint), "drawTextOnPath", "%s, %s, %ff, %ff, %s", findTextReplacement(text), path.getInstanceName(this), x, y, paint.getInstanceName(this));
+        if (!text.isEmpty()) {
+            OutputBuilder.appendMethodCall(this, OutputBuilder.dependencyList(this, paint), "drawTextOnPath", "%s, %s, %ff, %ff, %s", findTextReplacement(text), path.getInstanceName(this), x, y, paint.getInstanceName(this));
+        }
     }
 
     public void clipRect(float left, float top, float right, float bottom) {
