@@ -64,46 +64,65 @@ public class Main {
     private static void extractParameters(String[] args) {
         //TODO: proper parsing of the command line parameters
 
-        if (args.length < 1 || args.length > 6) {
+        if (args.length < 1 || args.length % 2 != 1) {
             printHelp();
-            error("Wrong arguments");
+            error("Wrong number of arguments");
+        }
+
+        //Print help for -h(elp)
+        if (args[0].startsWith("-h")) {
+            printHelp();
+            System.exit(0);
         }
 
         sInputFileName = args[0];
         sSimpleInputFileName = new File(sInputFileName).getName();
 
         sPackageName = "vector_render";
-        if (args.length > 1) {
-            sPackageName = args[1];
-        }
-
         sClassName = "VectorRender_" + sInputFileName.split(".svg")[0];
-        if (args.length > 2) {
-            sClassName = args[2];
-        }
-
-        sOutFileName = sClassName + ".java";
-        if (args.length > 3) {
-            sOutFileName = args[3];
-        }
-
         sTemplate = FILE_TEMPLATE;
-        if (args.length > 4) {
-            try {
-                byte[] encoded = Files.readAllBytes(Paths.get(args[4]));
-                sTemplate = new String(encoded);
-            } catch (IOException e) {
-                throw new RuntimeException("Error while reading template file", e);
+        sTextReplacement = null;
+
+        for (int i = 1; i < args.length; i += 2) {
+
+            switch (args[i]) {
+                case "-p":
+                    sPackageName = args[i + 1];
+                    break;
+
+                case "-c":
+                    sClassName = args[i + 1];
+                    break;
+
+                case "-o":
+                    sOutFileName = args[i + 1];
+                    break;
+
+                case "-t":
+                    try {
+                        byte[] encoded = Files.readAllBytes(Paths.get(args[i + 1]));
+                        sTemplate = new String(encoded);
+                    } catch (IOException e) {
+                        throw new RuntimeException("Error while reading template file", e);
+                    }
+                    break;
+
+                case "-rt":
+                    try {
+                        sTextReplacement = readHashMapFromFile(args[i + 1]);
+                    } catch (Exception e) {
+                        throw new RuntimeException("Error while parsing replacement text parameter", e);
+                    }
+                    break;
+
+                default:
+                    throw new RuntimeException("Unknown parameter: " + args[i]);
             }
         }
 
-        sTextReplacement = null;
-        if (args.length > 5) {
-            try {
-                sTextReplacement = readHashMapFromFile(args[5]);
-            } catch (Exception e) {
-                throw new RuntimeException("Error while parsing replacement text parameter", e);
-            }
+        //If the output file was not specified then it is derived from the class name
+        if (sOutFileName == null) {
+            sOutFileName = sClassName + ".java";
         }
     }
 
@@ -137,7 +156,7 @@ public class Main {
 
     private static void printHelp() {
         System.out.println(String.format("android-svg-code-render v%s (%s)", Version.FULL, new SimpleDateFormat("dd/MM/yyyy HH:mm").format(Version.BUILD_TIME)));
-        System.out.println("Usage: android-svg-code-render inputfile.svg <package name> <class name> <outputfile.java> <template file> <text replacement file>\n");
+        System.out.println("Usage: android-svg-code-render <inputfile.svg> [-p <package name>] [-c <class name>] [-o <outputfile.java>] [-t <template file>] [-rt <text replacement file>]\n");
     }
 
     public static void error(String msg, Object... params) {

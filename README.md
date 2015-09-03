@@ -15,19 +15,17 @@ There are similar projects already for desktop Java, but I have not found one ye
 The tool can be run from command line using standard Java JAR execution:
 
 ```
-java -jar android-svg-code-render inputfile.svg <package name> <class name> <outputfile.java> <template file> <text replacements>
+java -jar android-svg-code-render <inputfile.svg> [-p <package name>] [-c <class name>] [-o <outputfile.java>] [-t <template file>] [-rt <text replacement file>]
 ```
 
 Arguments for the executable are:
 * **inputfile.svg** (required) - SVG formatted input file path/name (compressed files are not supported at the moment)
-* **package name** (optional) - package name in the output file (default: "vector_render")
-* **class name** (optional) - name of the embedding class for the render method (default: "VectorRender")
-* **outputfile.java** (optional) - output file path/name (default: "VectorRender_*inputfilename*")
-* **template file** (optional) - template Java source file which will be used for generating the output (default: built-in template)
-* **text replacements file** (optional) - file name for a list of text elements in the SVG file which must be replaced by a Java variable (method parameter) in the output, list consists of lines with text element followed by variable name delimited by equals sign (default: none)
+* **-p &lt;package name&gt;** (optional) - package name in the output file (default: "vector_render")
+* **-c &lt;class name&gt;** (optional) - name of the embedding class for the render method (default: "VectorRender")
+* **-o &lt;outputfile.java&gt;** (optional) - output file path/name (default: "VectorRender_*inputfilename*")
+* **-t &lt;template file&gt;** (optional) - template Java source file which will be used for generating the output (default: built-in template)
+* **-rt &lt;text replacements file&gt;** (optional) - file name for a list of text elements in the SVG file which must be replaced by a Java variable (method parameter) in the output, list consists of lines with text element followed by variable name delimited by equals sign (default: none)
  
-In the current release the argument parsing is rather rudimentary, if you want to specify an optional argument then you have to specify all the arguments before that desired one. The order of the arguments cannot change. (See issue #55.)
-
 ### Output file
 
 The output will be a Java source file which can be used directly in your Android app without any additional library and without the original source SVG file itself.
