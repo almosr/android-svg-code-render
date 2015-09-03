@@ -15,7 +15,7 @@ There are similar projects already for desktop Java, but I have not found one ye
 The tool can be run from command line using standard Java JAR execution:
 
 ```
-java -jar android-svg-code-render inputfile.svg <package name> <class name> <outputfile.java> <template file>
+java -jar android-svg-code-render inputfile.svg <package name> <class name> <outputfile.java> <template file> <text replacements>
 ```
 
 Arguments for the executable are:
@@ -24,6 +24,7 @@ Arguments for the executable are:
 * **class name** (optional) - name of the embedding class for the render method (default: "VectorRender")
 * **outputfile.java** (optional) - output file path/name (default: "VectorRender_*inputfilename*")
 * **template file** (optional) - template Java source file which will be used for generating the output (default: built-in template)
+* **text replacements file** (optional) - file name for a list of text elements in the SVG file which must be replaced by a Java variable (method parameter) in the output, list consists of lines with text element followed by variable name delimited by equals sign (default: none)
  
 In the current release the argument parsing is rather rudimentary, if you want to specify an optional argument then you have to specify all the arguments before that desired one. The order of the arguments cannot change. (See issue #55.)
 
@@ -54,6 +55,19 @@ The format of the template file is pretty loose: it must be a text file with fou
 
 The only constraint around the rendering code is it expects a local variable: the target `Canvas` instance, named as `canvas`. Everything else is free-form in the template.
 (See related issue #58.)
+
+### How to replace static texts by dynamic variables
+
+Sometimes it is very useful to be able to render text dynamically as part of the vector output. By specifying the _text replacement file_ parameter it is possible to change specific static text strings in the output into Java variables or parameters.
+For example adding this line into a text file which is used as text replacement configuration:
+```
+player_name=playerName
+```
+
+Will change any texts in the SVG input file which reads "player_name" into a Java variable in the rendering which is called "playerName".
+All you need to do is passing a parameter to the render method as ```String playerName``` and you can change the rendered text dynamically every time when you call the render method. Easy as.
+
+At the end of the SVG file processing any not used text replacements will trigger a warning log to the standard output.
 
 ## Why would this be useful to anybody?
 

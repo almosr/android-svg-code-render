@@ -8,6 +8,7 @@ import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
+import java.util.HashMap;
 import java.util.Locale;
 
 /**
@@ -36,6 +37,7 @@ public class Main {
     private static String sPackageName;
     private static String sClassName;
     private static String sTemplate;
+    private static HashMap<String, String> sTextReplacement;
 
     public static void main(String[] args) {
 
@@ -62,7 +64,7 @@ public class Main {
     private static void extractParameters(String[] args) {
         //TODO: proper parsing of the command line parameters
 
-        if (args.length < 1 || args.length > 5) {
+        if (args.length < 1 || args.length > 6) {
             printHelp();
             error("Wrong arguments");
         }
@@ -94,6 +96,15 @@ public class Main {
                 throw new RuntimeException("Error while reading template file", e);
             }
         }
+
+        sTextReplacement = null;
+        if (args.length > 5) {
+            try {
+                sTextReplacement = readHashMapFromFile(args[5]);
+            } catch (Exception e) {
+                throw new RuntimeException("Error while parsing replacement text parameter", e);
+            }
+        }
     }
 
     private static void render(String inputFileName) throws IOException, SVGParseException {
@@ -105,7 +116,15 @@ public class Main {
         OutputBuilder.sHeight = svg.getDocumentHeight();
 
         //Main canvas object is created with the static instance name from the method parameters
-        svg.renderToCanvas(new Canvas(CANVAS_PARAMETER_NAME, 1, 1, true));
+        Canvas canvas = new Canvas(CANVAS_PARAMETER_NAME, 1, 1, true);
+        if (sTextReplacement != null) {
+            for (String item : sTextReplacement.keySet()) {
+                canvas.addTextReplacement(item, sTextReplacement.get(item));
+            }
+        }
+        svg.renderToCanvas(canvas);
+
+        canvas.verifyReplacementTextUsage();
 
         is.close();
     }
@@ -118,7 +137,7 @@ public class Main {
 
     private static void printHelp() {
         System.out.println(String.format("android-svg-code-render v%s (%s)", Version.FULL, new SimpleDateFormat("dd/MM/yyyy HH:mm").format(Version.BUILD_TIME)));
-        System.out.println("Usage: android-svg-code-render inputfile.svg <package name> <class name> <outputfile.java> <template file>\n");
+        System.out.println("Usage: android-svg-code-render inputfile.svg <package name> <class name> <outputfile.java> <template file> <text replacement file>\n");
     }
 
     public static void error(String msg, Object... params) {
@@ -137,5 +156,17 @@ public class Main {
         } else {
             System.exit(1);
         }
+    }
+
+    private static HashMap<String, String> readHashMapFromFile(String fileName) throws IOException {
+        BufferedReader reader = new BufferedReader(new FileReader(new File(fileName)));
+        HashMap<String, String> output = new HashMap<>();
+        String line;
+        while ((line = reader.readLine()) != null) {
+            String[] items = line.split("=");
+            output.put(items[0], items[1]);
+        }
+
+        return output;
     }
 }
