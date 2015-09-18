@@ -37,7 +37,6 @@ public class Main {
     private static String sPackageName;
     private static String sClassName;
     private static String sTemplate;
-    private static HashMap<String, String> sTextReplacement;
 
     public static void main(String[] args) {
 
@@ -81,7 +80,6 @@ public class Main {
         sPackageName = "vector_render";
         sClassName = "VectorRender_" + sInputFileName.split(".svg")[0];
         sTemplate = FILE_TEMPLATE;
-        sTextReplacement = null;
 
         for (int i = 1; i < args.length; i += 2) {
 
@@ -109,7 +107,10 @@ public class Main {
 
                 case "-rt":
                     try {
-                        sTextReplacement = readHashMapFromFile(args[i + 1]);
+                        HashMap<String, String> texts = readHashMapFromFile(args[i + 1]);
+                        for (String key : texts.keySet()) {
+                            TextReplacements.addTextReplacement(key, texts.get(key));
+                        }
                     } catch (Exception e) {
                         throw new RuntimeException("Error while parsing replacement text parameter", e);
                     }
@@ -136,14 +137,9 @@ public class Main {
 
         //Main canvas object is created with the static instance name from the method parameters
         Canvas canvas = new Canvas(CANVAS_PARAMETER_NAME, 1, 1, true);
-        if (sTextReplacement != null) {
-            for (String item : sTextReplacement.keySet()) {
-                canvas.addTextReplacement(item, sTextReplacement.get(item));
-            }
-        }
         svg.renderToCanvas(canvas);
 
-        canvas.verifyReplacementTextUsage();
+        TextReplacements.verifyReplacementTextUsage();
 
         is.close();
     }

@@ -3,8 +3,7 @@ package android.graphics;
 import android.util.Log;
 import android_svg_code_render.AndroidClass;
 import android_svg_code_render.OutputBuilder;
-
-import java.util.ArrayList;
+import android_svg_code_render.TextReplacements;
 
 /**
  * Simulated Android Canvas class
@@ -12,17 +11,14 @@ import java.util.ArrayList;
  * @author Almos Rajnai
  */
 public class Canvas extends AndroidClass {
-    private static final String TAG = Canvas.class.getName();
-
     public static final int HAS_ALPHA_LAYER_SAVE_FLAG = 4;
     public static final int MATRIX_SAVE_FLAG = 1;
+    private static final String TAG = Canvas.class.getName();
     private Matrix mMatrix;
     private int[] flagValues = {MATRIX_SAVE_FLAG, HAS_ALPHA_LAYER_SAVE_FLAG};
     private String[] flagNames = {"MATRIX_SAVE_FLAG", "HAS_ALPHA_LAYER_SAVE_FLAG"};
     private int mWidth;
     private int mHeight;
-
-    private ArrayList<TextReplacement> mTextReplacements = new ArrayList<>();
 
     //This flag is set if the Canvas is the root class which is referring to all other classes in the output.
     private boolean mRoot;
@@ -110,13 +106,13 @@ public class Canvas extends AndroidClass {
 
     public void drawText(String text, float x, float y, Paint paint) {
         if (!text.isEmpty()) {
-            OutputBuilder.appendMethodCall(this, OutputBuilder.dependencyList(this, paint), "drawText", "%s, %ff, %ff, %s", findTextReplacement(text), x, y, paint.getInstanceName(this));
+            OutputBuilder.appendMethodCall(this, OutputBuilder.dependencyList(this, paint), "drawText", "%s, %ff, %ff, %s", TextReplacements.findTextReplacement(text), x, y, paint.getInstanceName(this));
         }
     }
 
     public void drawTextOnPath(String text, Path path, float x, float y, Paint paint) {
         if (!text.isEmpty()) {
-            OutputBuilder.appendMethodCall(this, OutputBuilder.dependencyList(this, paint), "drawTextOnPath", "%s, %s, %ff, %ff, %s", findTextReplacement(text), path.getInstanceName(this), x, y, paint.getInstanceName(this));
+            OutputBuilder.appendMethodCall(this, OutputBuilder.dependencyList(this, paint), "drawTextOnPath", "%s, %s, %ff, %ff, %s", TextReplacements.findTextReplacement(text), path.getInstanceName(this), x, y, paint.getInstanceName(this));
         }
     }
 
@@ -144,39 +140,5 @@ public class Canvas extends AndroidClass {
     public boolean isUsed() {
         //Root canvas instamce must not be removed
         return mRoot || super.isUsed();
-    }
-
-    public void addTextReplacement(String text, String variable) {
-        mTextReplacements.add(new TextReplacement(text, variable));
-    }
-
-    private String findTextReplacement(String text) {
-        for (TextReplacement textReplacement : mTextReplacements) {
-            if (textReplacement.text.equals(text)) {
-                textReplacement.used = true;
-                return textReplacement.parameter;
-            }
-        }
-
-        return String.format("\"%s\"", text);
-    }
-
-    public void verifyReplacementTextUsage() {
-        for (TextReplacement textReplacement : mTextReplacements) {
-            if (!textReplacement.used) {
-                Log.w(TAG, String.format("Text for replacement was not found: '%s'", textReplacement.text));
-            }
-        }
-    }
-
-    private class TextReplacement {
-        String text;
-        String parameter;
-        boolean used;
-
-        public TextReplacement(String text, String parameter) {
-            this.text = text;
-            this.parameter = parameter;
-        }
     }
 }
