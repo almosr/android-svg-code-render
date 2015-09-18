@@ -32,7 +32,7 @@ public class TextReplacements {
     public static void verifyReplacementTextUsage() {
         for (TextReplacement textReplacement : sTextReplacements) {
             if (!textReplacement.used) {
-                Log.w(TAG, String.format("Text for replacement was not found: '%s'", textReplacement.text));
+                Log.w(TAG, String.format("Text to replace was not found: '%s'", textReplacement.text));
             }
         }
     }
