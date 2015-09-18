@@ -2,6 +2,7 @@ package android.graphics;
 
 import android.util.Log;
 import android_svg_code_render.AndroidClass;
+import android_svg_code_render.ColorReplacements;
 import android_svg_code_render.OutputBuilder;
 import android_svg_code_render.TextReplacements;
 
@@ -121,7 +122,7 @@ public class Canvas extends AndroidClass {
     }
 
     public void drawColor(int color) {
-        OutputBuilder.appendMethodCall(this, OutputBuilder.dependencyList(this), "drawColor", "0x%08x", color);
+        OutputBuilder.appendMethodCall(this, OutputBuilder.dependencyList(this), "drawColor", "%s", ColorReplacements.findColorReplacement(color));
     }
 
     public void clipPath(Path clipPath) {

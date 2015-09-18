@@ -8,7 +8,6 @@ import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
-import java.util.HashMap;
 import java.util.Locale;
 
 /**
@@ -107,12 +106,17 @@ public class Main {
 
                 case "-rt":
                     try {
-                        HashMap<String, String> texts = readHashMapFromFile(args[i + 1]);
-                        for (String key : texts.keySet()) {
-                            TextReplacements.addTextReplacement(key, texts.get(key));
-                        }
+                        ConfigFileUtils.readTextReplacementConfig(args[i + 1]);
                     } catch (Exception e) {
                         throw new RuntimeException("Error while parsing replacement text parameter", e);
+                    }
+                    break;
+
+                case "-rc":
+                    try {
+                        ConfigFileUtils.readColorReplacementConfig(args[i + 1]);
+                    } catch (Exception e) {
+                        throw new RuntimeException("Error while parsing replacement color parameter", e);
                     }
                     break;
 
@@ -140,6 +144,7 @@ public class Main {
         svg.renderToCanvas(canvas);
 
         TextReplacements.verifyReplacementTextUsage();
+        ColorReplacements.verifyReplacementColorUsage();
 
         is.close();
     }
@@ -152,7 +157,7 @@ public class Main {
 
     private static void printHelp() {
         System.out.println(String.format("android-svg-code-render v%s (%s)", Version.FULL, new SimpleDateFormat("dd/MM/yyyy HH:mm").format(Version.BUILD_TIME)));
-        System.out.println("Usage: android-svg-code-render <inputfile.svg> [-p <package name>] [-c <class name>] [-o <outputfile.java>] [-t <template file>] [-rt <text replacement file>]\n");
+        System.out.println("Usage: android-svg-code-render <inputfile.svg> [-p <package name>] [-c <class name>] [-o <outputfile.java>] [-t <template file>] [-rt <text replacement file>] [-rc <color replacement file>]\n");
     }
 
     public static void error(String msg, Object... params) {
@@ -171,17 +176,5 @@ public class Main {
         } else {
             System.exit(1);
         }
-    }
-
-    private static HashMap<String, String> readHashMapFromFile(String fileName) throws IOException {
-        BufferedReader reader = new BufferedReader(new FileReader(new File(fileName)));
-        HashMap<String, String> output = new HashMap<>();
-        String line;
-        while ((line = reader.readLine()) != null) {
-            String[] items = line.split("=");
-            output.put(items[0], items[1]);
-        }
-
-        return output;
     }
 }

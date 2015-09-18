@@ -25,6 +25,7 @@ Arguments for the executable are:
 * **-o &lt;outputfile.java&gt;** (optional) - output file path/name (default: "VectorRender_*inputfilename*")
 * **-t &lt;template file&gt;** (optional) - template Java source file which will be used for generating the output (default: built-in template)
 * **-rt &lt;text replacements file&gt;** (optional) - file name for a list of text elements in the SVG file which must be replaced by a Java variable (method parameter) in the output, list consists of lines with text element followed by variable name delimited by equals sign (default: none)
+* **-rc &lt;color replacements file&gt;** (optional) - file name for a list of color elements in the SVG file which must be replaced by a Java variable (method parameter) in the output, list consists of lines with color element (format: #AARRGGBB) followed by variable name delimited by equals sign (default: none)
  
 ### Output file
 
@@ -54,18 +55,26 @@ The format of the template file is pretty loose: it must be a text file with fou
 The only constraint around the rendering code is it expects a local variable: the target `Canvas` instance, named as `canvas`. Everything else is free-form in the template.
 (See related issue #58.)
 
-### How to replace static texts by dynamic variables
+### How to replace static texts or colors by dynamic variables
 
-Sometimes it is very useful to be able to render text dynamically as part of the vector output. By specifying the _text replacement file_ parameter it is possible to change specific static text strings in the output into Java variables or parameters.
+Sometimes it is very handy to be able to render text or color dynamically as part of the vector output. By specifying a _replacement file_ parameter either for texts or for colors it is possible to change specific static items in the output into Java variables or parameters.
 For example adding this line into a text file which is used as text replacement configuration:
 ```
 player_name=playerName
 ```
 
-Will change any texts in the SVG input file which reads "player_name" into a Java variable in the rendering which is called "playerName".
+Will change any texts in the SVG input file which reads "player_name" into a Java variable in the rendering which is called ```playerName```.
 All you need to do is passing a parameter to the render method as ```String playerName``` and you can change the rendered text dynamically every time when you call the render method. Easy as.
 
-At the end of the SVG file processing any not used text replacements will trigger a warning log to the standard output.
+Changing colors into dynamic variables is similarly simple, for example this color replacement configuration:
+```
+#ffff0000=backgroundColor
+```
+
+Will change any colors in the SVG input file which is plain red (ARGB code is 0xFFFF0000) into a Java variable in the rendering which is called "```backgroundColor```".
+Pass a parameter to the render method as ```int backgroundColor``` and you can specify the color right before rendering.
+
+At the end of the SVG file processing any not used text and color replacements will trigger a warning log to the standard output.
 
 ## Why would this be useful to anybody?
 

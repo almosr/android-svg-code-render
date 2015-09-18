@@ -1,6 +1,7 @@
 package android.graphics;
 
 import android_svg_code_render.AndroidClass;
+import android_svg_code_render.ColorReplacements;
 import android_svg_code_render.OutputBuilder;
 
 /**
@@ -165,15 +166,11 @@ public class Paint extends AndroidClass {
     public void setColor(int color) {
         checkInheritance();
         mColor = color;
-        OutputBuilder.appendMethodCall(this, OutputBuilder.dependencyList(this), "setColor", "0x%08x", color);
+        OutputBuilder.appendMethodCall(this, OutputBuilder.dependencyList(this), "setColor", "%s", ColorReplacements.findColorReplacement(color));
     }
 
     public void getTextPath(String text, int start, int end, float x, float y, Path path) {
         throw new RuntimeException("Dummy function");
-    }
-
-    public enum Style {
-        STROKE, FILL
     }
 
     @Override
@@ -196,6 +193,10 @@ public class Paint extends AndroidClass {
             init(OutputBuilder.dependencyList(mParent), mParent.getInstanceName(this));
             mParent = null;
         }
+    }
+
+    public enum Style {
+        STROKE, FILL
     }
 
     public enum Cap {ROUND, SQUARE, BUTT}
