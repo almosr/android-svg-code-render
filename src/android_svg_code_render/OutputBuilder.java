@@ -218,7 +218,7 @@ public class OutputBuilder {
 
     private static List<AndroidClass> scanDependencies(int start) {
         HashSet<AndroidClass> createdInstances = new HashSet<>();
-        HashSet<AndroidClass> depencencies = new HashSet<>();
+        HashSet<AndroidClass> dependencies = new HashSet<>();
         for (int j = start; j < sOutput.size(); j++) {
             //Gather created instances from output instances
             OutputItem item = sOutput.get(j);
@@ -233,13 +233,13 @@ public class OutputBuilder {
                 for (AndroidClass dependency : item.getDependencies()) {
                     if (!createdInstances.contains(dependency)) {
                         //Not created here, add as external dependency
-                        depencencies.add(dependency);
+                        dependencies.add(dependency);
                     }
                 }
             }
         }
 
-        return new ArrayList<>(depencencies);
+        return new ArrayList<>(dependencies);
     }
 
     private static String mergeOutput() {
