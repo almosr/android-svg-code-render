@@ -248,7 +248,7 @@ public class OutputBuilder {
                 //Check each dependency if it was created in the current block
                 for (AndroidClass dependency : item.getDependencies()) {
                     if (!createdInstances.contains(dependency)) {
-                        //Not created here, add as external depencency
+                        //Not created here, add as external dependency
                         depencencies.add(dependency);
                     }
                 }
