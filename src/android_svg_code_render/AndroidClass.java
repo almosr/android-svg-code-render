@@ -68,12 +68,22 @@ public abstract class AndroidClass {
     }
 
     public static String generateInstanceName(Class clazz) {
+        return generateInstanceName(clazz, false);
+    }
+
+    public static String generateInstanceName(Class clazz, boolean allCaps) {
         Integer count = sNameCache.get(clazz);
         if (count == null) {
             count = 0;
         }
 
-        String name = String.format("%s_%d", clazz.getSimpleName(), count).toLowerCase();
+        String name = String.format("%s_%d", clazz.getSimpleName(), count);
+        if (allCaps) {
+            name = name.toUpperCase();
+        } else {
+            name = name.toLowerCase();
+        }
+
         count++;
         sNameCache.put(clazz, count);
         return name;

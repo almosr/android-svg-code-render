@@ -10,6 +10,7 @@ import java.util.*;
 public class OutputBuilder {
     private static final int METHOD_SIZE_THRESHOLD = 3000;
 
+    private static ArrayList<OutputItem> sStaticItems;
     private static ArrayList<OutputItem> sOutput;
     private static SortedSet<String> sImports;
     private static HashSet<AndroidClass> sInstances;
@@ -19,6 +20,7 @@ public class OutputBuilder {
     public static float sHeight;
 
     public static void init() {
+        sStaticItems = new ArrayList<>();
         sOutput = new ArrayList<>();
         sImports = new TreeSet<>();
         sInstances = new HashSet<>();
@@ -51,11 +53,7 @@ public class OutputBuilder {
             strImports.append(String.format("import %s;\n", include));
         }
 
-        String strDimensions = String.format(
-                "    public static final float WIDTH = %ff;\n" +
-                        "    public static final float HEIGHT = %ff;\n", sWidth, sHeight);
-
-        str.append(String.format(fileTemplate, packageName, strImports, className, strDimensions, mergeOutput()));
+        str.append(String.format(fileTemplate, packageName, strImports, className, mergeConstants(), mergeOutput()));
 
         return str.toString();
     }
@@ -95,22 +93,8 @@ public class OutputBuilder {
         return Arrays.toString(outputList).replace(",", " |").replace("[", "").replace("]", "");
     }
 
-    public static String createArrayParameter(float[] array) {
-        return String.format("new float[] %s", Arrays.toString(array).replace("[", "{").replace("]", "f}").replace(",", "f,"));
-    }
-
-    public static String createArrayParameter(int[] array, boolean hexFormat) {
-        String numFormat = hexFormat ? "0x%08x" : "%d";
-        StringBuilder numlist = new StringBuilder();
-        numlist.append("new int[] {");
-        for (int i = 0; i < array.length; i++) {
-            numlist.append(String.format(numFormat, array[i]));
-            if (i != array.length - 1) {
-                numlist.append(", ");
-            }
-        }
-        numlist.append("}");
-        return numlist.toString();
+    public static void appendConstant(AndroidClass constant, String line) {
+        sStaticItems.add(new OutputItem(constant, constant, null, line));
     }
 
     public static void addImport(Class clazz) {
@@ -264,6 +248,24 @@ public class OutputBuilder {
         for (OutputItem outputItem : sOutput) {
             if (outputItem.getInstance() == null || outputItem.getInstance().isUsed()) {
                 output.append(outputItem.getOutput());
+            }
+        }
+
+        return output.toString();
+    }
+
+    private static String mergeConstants() {
+        StringBuilder output = new StringBuilder();
+
+        output.append(String.format(
+                "    public static final float WIDTH = %ff;\n" +
+                        "    public static final float HEIGHT = %ff;\n", sWidth, sHeight));
+
+        for (OutputItem outputItem : sStaticItems) {
+            if (outputItem.getInstance() == null || outputItem.getInstance().isUsed()) {
+                output.append("    ");
+                output.append(outputItem.getOutput());
+                output.append("\n");
             }
         }
 

@@ -1,5 +1,7 @@
 package android.graphics;
 
+import android.util.FloatConstantArray;
+import android.util.IntConstantArray;
 import android_svg_code_render.OutputBuilder;
 
 /**
@@ -12,10 +14,13 @@ public class RadialGradient extends Shader {
     public RadialGradient(float cx, float cy, float r, int[] colours, float[] positions, TileMode tileMode) {
         OutputBuilder.addImport(Shader.class);
 
-        init(null, "%ff, %ff, %ff, %s, %s, %s",
+        IntConstantArray colourConst = new IntConstantArray(colours, true);
+        FloatConstantArray posConst = new FloatConstantArray(positions);
+
+        init(OutputBuilder.dependencyList(colourConst, posConst), "%ff, %ff, %ff, %s, %s, %s",
                 cx, cy, r,
-                OutputBuilder.createArrayParameter(colours, true),
-                OutputBuilder.createArrayParameter(positions),
+                colourConst.getInstanceName(this),
+                posConst.getInstanceName(this),
                 "Shader.TileMode." + tileMode.name());
     }
 }

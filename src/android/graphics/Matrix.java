@@ -1,5 +1,6 @@
 package android.graphics;
 
+import android.util.FloatConstantArray;
 import android_svg_code_render.AndroidClass;
 import android_svg_code_render.OutputBuilder;
 
@@ -38,7 +39,8 @@ public class Matrix extends AndroidClass {
     }
 
     public void mapPoints(float[] points) {
-        OutputBuilder.appendMethodCall(this, OutputBuilder.dependencyList(this), "mapPoints", OutputBuilder.createArrayParameter(points));
+        FloatConstantArray constant = new FloatConstantArray(points);
+        OutputBuilder.appendMethodCall(this, OutputBuilder.dependencyList(this, constant), "mapPoints", constant.getInstanceName(this));
     }
 
     public void preTranslate(float x, float y) {
@@ -78,7 +80,8 @@ public class Matrix extends AndroidClass {
     }
 
     public void setValues(float[] values) {
-        OutputBuilder.appendMethodCall(this, OutputBuilder.dependencyList(this), "setValues", OutputBuilder.createArrayParameter(values));
+        FloatConstantArray constant = new FloatConstantArray(values);
+        OutputBuilder.appendMethodCall(this, OutputBuilder.dependencyList(this, constant), "setValues", constant.getInstanceName(this));
     }
 
     public void preRotate(float degree, float cx, float cy) {
