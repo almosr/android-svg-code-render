@@ -41,4 +41,9 @@ public class Typeface extends AndroidClass {
         return newTypeface;
 
     }
+
+    @Override
+    public String getResetMethod() {
+        return "";
+    }
 }

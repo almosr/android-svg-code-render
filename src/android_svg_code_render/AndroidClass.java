@@ -64,6 +64,7 @@ public abstract class AndroidClass {
                 getInstanceName(null),
                 simpleClassName,
                 parameters != null ? String.format(parameters, objects) : "");
+        OutputBuilder.append(this, this, dependencies, getResetMethod());
     }
 
     public static String generateInstanceName(Class clazz) {
@@ -86,5 +87,9 @@ public abstract class AndroidClass {
         count++;
         sNameCache.put(clazz, count);
         return name;
+    }
+
+    public String getResetMethod() {
+        return String.format("%s.reset();", getInstanceName(null));
     }
 }
