@@ -15,7 +15,7 @@ import java.util.zip.ZipEntry;
  */
 public class Version {
     public static final int MAJOR = 1;
-    public static final int MINOR = 1;
+    public static final int MINOR = 2;
     public static final int REVISION = 0;
 
     public static final String FULL = String.format("%d.%d.%d", MAJOR, MINOR, REVISION);
