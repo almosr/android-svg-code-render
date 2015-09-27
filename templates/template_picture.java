@@ -8,7 +8,7 @@ public class %s {
 %s
     private boolean inited;
 %s
-    public void init() {
+    private void init() {
         if (inited) return;
         inited = true;
 %s
