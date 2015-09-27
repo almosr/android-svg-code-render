@@ -49,7 +49,7 @@ The format of the template file is pretty loose: it must be a text file with fou
 1. package name
 2. the imports for the used classes
 3. class name
-4. two `float` constants, called `WIDTH` and `HEIGHT`, which contain the width and the height of the source SVG document
+4. list of constants, including two `float` constants, called `WIDTH` and `HEIGHT`, which contain the width and the height of the source SVG document
 5. the body of the rendering code
 
 The only constraint around the rendering code is it expects a local variable: the target `Canvas` instance, named as `canvas`. Everything else is free-form in the template.
