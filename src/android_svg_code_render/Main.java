@@ -19,16 +19,24 @@ public class Main {
     public static final String CANVAS_PARAMETER_NAME = "canvas";
 
     private static final String FILE_TEMPLATE =
-            "package %s;\n\n" +                     //Package name
-                    "%s\n" +                        //Imports
-                    "public class %s {\n" +         //Class name
-                    "\n%s\n" +                      //Dimension constants
-                    "    public static void render(Canvas " + CANVAS_PARAMETER_NAME + ", int width, int height) {\n" +
-                    "        canvas.save();\n" +
-                    "        canvas.scale(width / WIDTH, height / HEIGHT);\n" +
-                    "%s" +                          //Generated source
-                    "        canvas.restore();\n" +
-                    "    }\n}\n";
+            "package %s;\n\n" +                       //Package name
+                    "%s\n" +                          //Imports
+                    "public class %s {\n" +           //Class name
+                    "\n%s" +                          //Constants
+                    "    private boolean inited;\n" + //Inited flag
+                    "%s\n" +                          //Fields
+                    "    private void init() {\n" +    //Init method header
+                    "        if (inited) return;\n" + //Check for already executed init and leave if it was done
+                    "        inited = true;\n" +      //Mark the init as executed
+                    "%s" +                            //Init method body
+                    "    }\n\n" +                     //Init method end
+                    "    public void render(Canvas " + CANVAS_PARAMETER_NAME + ", int width, int height) {\n" + //Render method
+                    "        init();\n" +             //Call init of fields
+                    "        canvas.save();\n" +      //Save canvas state before rendering
+                    "        canvas.scale(width / WIDTH, height / HEIGHT);\n" +  //Scale output to canvas size
+                    "%s" +                            //Generated source
+                    "        canvas.restore();\n" +   //Restore canvas state
+                    "    }\n}\n";                     //Finished
 
     private static String sInputFileName;
     private static String sSimpleInputFileName;

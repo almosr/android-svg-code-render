@@ -189,8 +189,9 @@ public class Paint extends AndroidClass {
         //Paint instance which was used in the constructor as parameter.
         //But since this instance will be changed now we need a real new Paint instance, so we create it now.
         if (mParent != null) {
-            //This instance is referring to the parent class
-            init(OutputBuilder.dependencyList(mParent), mParent.getInstanceName(this));
+            //This instance is referring to the parent class, must be initialized from that
+            init(OutputBuilder.dependencyList(mParent));
+            OutputBuilder.append(this, this, OutputBuilder.dependencyList(mParent), "%s.set(%s);", getInstanceName(null), mParent.getInstanceName(this));
             mParent = null;
         }
     }

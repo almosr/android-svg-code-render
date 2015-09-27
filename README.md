@@ -50,7 +50,9 @@ The format of the template file is pretty loose: it must be a text file with fou
 2. the imports for the used classes
 3. class name
 4. list of constants, including two `float` constants, called `WIDTH` and `HEIGHT`, which contain the width and the height of the source SVG document
-5. the body of the rendering code
+5. list of fields for all Android class instances which are allocated for the rendering
+6. the body of the field initialization code
+7. the body of the rendering code
 
 The only constraint around the rendering code is it expects a local variable: the target `Canvas` instance, named as `canvas`. Everything else is free-form in the template.
 (See related issue #58.)
@@ -110,7 +112,7 @@ As it seems the generated code increases the size of the APK file more than the 
 There are some issues which needed to be addressed sooner or later:
 
 * Probably not all SVG files will be converted successfully. If you find any files which are working with the original androidsvg library (see below), but doesn't work from the converted format or you get an exception while running the tool then get in touch with me.
-* Text rendering is most likely not working properly, I haven't tried too much, but it seems to be depending on the calculation of the width of the rendered text. This part is not implemented yet, don't be surprised too much if your vector file looks funny with text in it.
+* Text rendering is most likely not working properly, I haven't tried too much, but it seems to be depending on the calculation of the width of the rendered text. This part is not implemented yet, don't be surprised too much if your vector file looks funny with text in it. Also currently default font will be used (with appropoiate text styles).
 * The outputted code is not optimized too deeply. Some optimization was done by eliminating useless objects, but still an awful lot of unnecessary `Paint` and `Matrix` instances are created with no good reason. The original library is a bit too hasty with cloning these instances, probably it will be possible to eliminate these later on to save some memory and increase the performance even further. (See issue #57.)
 
 ## Original source

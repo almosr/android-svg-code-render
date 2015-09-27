@@ -11,6 +11,7 @@ public class OutputBuilder {
     private static final int METHOD_SIZE_THRESHOLD = 3000;
 
     private static ArrayList<OutputItem> sStaticItems;
+    private static ArrayList<OutputItem> sInitOutput;
     private static ArrayList<OutputItem> sOutput;
     private static SortedSet<String> sImports;
     private static HashSet<AndroidClass> sInstances;
@@ -21,6 +22,7 @@ public class OutputBuilder {
 
     public static void init() {
         sStaticItems = new ArrayList<>();
+        sInitOutput = new ArrayList<>();
         sOutput = new ArrayList<>();
         sImports = new TreeSet<>();
         sInstances = new HashSet<>();
@@ -53,15 +55,17 @@ public class OutputBuilder {
             strImports.append(String.format("import %s;\n", include));
         }
 
-        str.append(String.format(fileTemplate, packageName, strImports, className, mergeConstants(), mergeOutput()));
+        str.append(String.format(fileTemplate, packageName, strImports, className, mergeConstants(), mergeFields(), mergeInits(), mergeOutput()));
 
         return str.toString();
     }
 
-    public static void append(AndroidClass instance, AndroidClass instanceCreated, AndroidClass[] dependencies, String text, Object... params) {
-        sOutput.add(new OutputItem(instance, instanceCreated, dependencies, String.format("        " + text + "\n", params)));
+    public static void appendInit(AndroidClass instance, AndroidClass instanceCreated, AndroidClass[] dependencies, String text, Object... params) {
+        appendInternal(sInitOutput, instance, instanceCreated, dependencies, text, params);
+    }
 
-        sInstances.add(instance);
+    public static void append(AndroidClass instance, AndroidClass instanceCreated, AndroidClass[] dependencies, String text, Object... params) {
+        appendInternal(sOutput, instance, instanceCreated, dependencies, text, params);
     }
 
     public static void appendMethodCall(AndroidClass instance, AndroidClass[] dependencies, String methodName) {
@@ -103,6 +107,12 @@ public class OutputBuilder {
 
     public static AndroidClass[] dependencyList(AndroidClass... dependencies) {
         return dependencies;
+    }
+
+    private static void appendInternal(ArrayList<OutputItem> outputList, AndroidClass instance, AndroidClass instanceCreated, AndroidClass[] dependencies, String text, Object[] params) {
+        outputList.add(new OutputItem(instance, instanceCreated, dependencies, text != null ? String.format("        " + text + "\n", params) : null));
+
+        sInstances.add(instance);
     }
 
     private static void optimize() {
@@ -169,43 +179,8 @@ public class OutputBuilder {
         ArrayList<OutputItem> items = new ArrayList<>(sOutput.subList(0, METHOD_SIZE_THRESHOLD));
         for (int i = METHOD_SIZE_THRESHOLD; i < sOutput.size(); i += METHOD_SIZE_THRESHOLD) {
 
-            //Get all dependencies of the remaining part of the code
-            List<AndroidClass> dependencies = scanDependencies(i);
-
-            //Sort dependencies according to their instance name
-            Collections.sort(dependencies, new Comparator<AndroidClass>() {
-                @Override
-                public int compare(AndroidClass o1, AndroidClass o2) {
-                    return o1.getInstanceName(null).compareTo(o2.getInstanceName(null));
-                }
-            });
-
-            //Turn dependencies into method parameter and argument list
-            String parameters = "";
-            String arguments = "";
-            HashSet<String> processed = new HashSet<>();
-            for (int d = 0; d < dependencies.size(); d++) {
-                AndroidClass instance = dependencies.get(d);
-                String instanceName = instance.getInstanceName(null);
-
-                //This is a workaround for the Paint instance optimization trick:
-                //sometimes a Paint instance is referring to a parent instance instead, when the instance name is read
-                //then it returns the name of the parent.
-                //Since both Paint instance are unique the name would be duplicated in the method header,
-                //so we filter out the duplication by keeping track of the processed instances by name and not by instance reference.
-                if (!processed.contains(instanceName)) {
-                    processed.add(instanceName);
-                    parameters += instanceName;
-                    arguments += String.format("%s %s", instance.getClass().getSimpleName(), instanceName);
-                    if (d < dependencies.size() - 1) {
-                        parameters += ", ";
-                        arguments += ", ";
-                    }
-                }
-            }
-
             //Insert daisy-chain method calling and new method definition before the next block of code
-            String line = String.format("        render_%d(%s);\n    }\n\n    private static void render_%1$d(%s) {\n", sSubMethodCounter++, parameters, arguments);
+            String line = String.format("        render_%d(canvas);\n    }\n\n    private void render_%1$d(Canvas canvas) {\n", sSubMethodCounter++);
             items.add(new OutputItem(null, null, null, line));
 
             //Copy over the code block (or remaining part of it)
@@ -216,30 +191,29 @@ public class OutputBuilder {
         sOutput = items;
     }
 
-    private static List<AndroidClass> scanDependencies(int start) {
-        HashSet<AndroidClass> createdInstances = new HashSet<>();
-        HashSet<AndroidClass> dependencies = new HashSet<>();
-        for (int j = start; j < sOutput.size(); j++) {
-            //Gather created instances from output instances
-            OutputItem item = sOutput.get(j);
+    private static String mergeFields() {
+        StringBuilder output = new StringBuilder();
 
-            //Collect created instances into a hash set
-            if (item.getInstanceCreated() != null) {
-                createdInstances.add(item.getInstanceCreated());
-            }
-
-            if (item.getDependencies() != null) {
-                //Check each dependency if it was created in the current block
-                for (AndroidClass dependency : item.getDependencies()) {
-                    if (!createdInstances.contains(dependency)) {
-                        //Not created here, add as external dependency
-                        dependencies.add(dependency);
-                    }
-                }
+        for (OutputItem outputItem : sInitOutput) {
+            if (outputItem.getInstance() != null && outputItem.getInstance().isUsed()) {
+                output.append(String.format("    private %s %s;\n", outputItem.getInstance().getClass().getSimpleName(), outputItem.getInstance().getInstanceName(null)));
             }
         }
 
-        return new ArrayList<>(dependencies);
+        return output.toString();
+    }
+
+    private static String mergeInits() {
+        StringBuilder output = new StringBuilder();
+
+        for (OutputItem outputItem : sInitOutput) {
+            String line = outputItem.getOutput();
+            if (outputItem.getInstance() != null && outputItem.getInstance().isUsed() && line != null) {
+                output.append(line);
+            }
+        }
+
+        return output.toString();
     }
 
     private static String mergeOutput() {
@@ -262,12 +236,14 @@ public class OutputBuilder {
                         "    public static final float HEIGHT = %ff;\n", sWidth, sHeight));
 
         for (OutputItem outputItem : sStaticItems) {
-            if (outputItem.getInstance() == null || outputItem.getInstance().isUsed()) {
+            if (outputItem.getInstance() != null && outputItem.getInstance().isUsed()) {
                 output.append("    ");
                 output.append(outputItem.getOutput());
                 output.append("\n");
             }
         }
+
+        output.append("\n");
 
         return output.toString();
     }

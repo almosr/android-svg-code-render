@@ -60,8 +60,7 @@ public abstract class AndroidClass {
         OutputBuilder.addImport(getClass());
 
         String simpleClassName = getClass().getSimpleName();
-        OutputBuilder.append(this, this, dependencies, "%s %s = new %s(%s);",
-                simpleClassName,
+        OutputBuilder.appendInit(this, this, dependencies, "%s = new %s(%s);",
                 getInstanceName(null),
                 simpleClassName,
                 parameters != null ? String.format(parameters, objects) : "");

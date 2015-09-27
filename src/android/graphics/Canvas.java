@@ -85,7 +85,8 @@ public class Canvas extends AndroidClass {
 
     private void getMatrixInstanceFromCanvas() {
         mMatrix = new Matrix(generateInstanceName(Matrix.class));
-        OutputBuilder.append(mMatrix, mMatrix, OutputBuilder.dependencyList(this), "Matrix %s = %s.getMatrix();", mMatrix.getInstanceName(this), getInstanceName(this));
+        OutputBuilder.appendInit(mMatrix, null, null, null);
+        OutputBuilder.append(mMatrix, mMatrix, OutputBuilder.dependencyList(this), "%s = %s.getMatrix();", mMatrix.getInstanceName(this), getInstanceName(this));
     }
 
     public void translate(float x, float y) {
