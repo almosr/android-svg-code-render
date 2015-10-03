@@ -16,7 +16,7 @@ public class Matrix extends AndroidClass {
     }
 
     public Matrix() {
-        init(null);
+        init();
     }
 
     public Matrix(String instanceName) {
@@ -24,34 +24,34 @@ public class Matrix extends AndroidClass {
     }
 
     public void postConcat(Matrix matrix) {
-        OutputBuilder.appendMethodCall(this, OutputBuilder.dependencyList(this, matrix), "postConcat", matrix.getInstanceName(this));
+        OutputBuilder.appendMethodCall(this, "postConcat", matrix.getInstanceName(this));
     }
 
     public boolean invert(Matrix matrix) {
-        OutputBuilder.appendMethodCall(this, OutputBuilder.dependencyList(this, matrix), "invert", "%s", matrix.getInstanceName(this));
+        OutputBuilder.appendMethodCall(this, "invert", "%s", matrix.getInstanceName(this));
 
         //TODO: matrix invert
         return true;
     }
 
     public void preConcat(Matrix matrix) {
-        OutputBuilder.appendMethodCall(this, OutputBuilder.dependencyList(this, matrix), "preConcat", matrix.getInstanceName(this));
+        OutputBuilder.appendMethodCall(this, "preConcat", matrix.getInstanceName(this));
     }
 
     public void mapPoints(float[] points) {
         FloatConstantArray constant = new FloatConstantArray(points);
-        OutputBuilder.appendMethodCall(this, OutputBuilder.dependencyList(this, constant), "mapPoints", constant.getInstanceName(this));
+        OutputBuilder.appendMethodCall(this, "mapPoints", constant.getInstanceName(this));
     }
 
     public void preTranslate(float x, float y) {
         if (x != 0.0f || y != 0.0f) {
-            OutputBuilder.appendMethodCall(this, OutputBuilder.dependencyList(this), "preTranslate", "%ff, %ff", x, y);
+            OutputBuilder.appendMethodCall(this, "preTranslate", "%ff, %ff", x, y);
         }
     }
 
     public void preScale(float xScale, float yScale) {
         if (xScale != 1.0f || yScale != 1.0f) {
-            OutputBuilder.appendMethodCall(this, OutputBuilder.dependencyList(this), "preScale", "%ff, %ff", xScale, yScale);
+            OutputBuilder.appendMethodCall(this, "preScale", "%ff, %ff", xScale, yScale);
         }
     }
 
@@ -81,7 +81,7 @@ public class Matrix extends AndroidClass {
 
     public void setValues(float[] values) {
         FloatConstantArray constant = new FloatConstantArray(values);
-        OutputBuilder.appendMethodCall(this, OutputBuilder.dependencyList(this, constant), "setValues", constant.getInstanceName(this));
+        OutputBuilder.appendMethodCall(this, "setValues", constant.getInstanceName(this));
     }
 
     public void preRotate(float degree, float cx, float cy) {

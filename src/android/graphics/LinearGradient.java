@@ -17,7 +17,7 @@ public class LinearGradient extends Shader {
         IntConstantArray colourConst = new IntConstantArray(colours, true);
         FloatConstantArray posConst = new FloatConstantArray(positions);
 
-        init(OutputBuilder.dependencyList(colourConst, posConst), "%ff, %ff, %ff, %ff, %s, %s, %s",
+        init("%ff, %ff, %ff, %ff, %s, %s, %s",
                 x1, y1, x2, y2,
                 colourConst.getInstanceName(this),
                 posConst.getInstanceName(this),

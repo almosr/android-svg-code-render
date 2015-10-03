@@ -9,16 +9,14 @@ import java.util.*;
  */
 public class OutputBuilder {
     private static final int METHOD_SIZE_THRESHOLD = 3000;
-
+    public static float sWidth;
+    public static float sHeight;
     private static ArrayList<OutputItem> sStaticItems;
     private static ArrayList<OutputItem> sInitOutput;
     private static ArrayList<OutputItem> sOutput;
     private static SortedSet<String> sImports;
     private static HashSet<AndroidClass> sInstances;
     private static int sSubMethodCounter;
-
-    public static float sWidth;
-    public static float sHeight;
 
     public static void init() {
         sStaticItems = new ArrayList<>();
@@ -60,23 +58,23 @@ public class OutputBuilder {
         return str.toString();
     }
 
-    public static void appendInit(AndroidClass instance, AndroidClass instanceCreated, AndroidClass[] dependencies, String text, Object... params) {
-        appendInternal(sInitOutput, instance, instanceCreated, dependencies, text, params);
+    public static void appendInit(AndroidClass instance, String text, Object... params) {
+        appendInternal(sInitOutput, instance, text, params);
     }
 
-    public static void append(AndroidClass instance, AndroidClass instanceCreated, AndroidClass[] dependencies, String text, Object... params) {
-        appendInternal(sOutput, instance, instanceCreated, dependencies, text, params);
+    public static void append(AndroidClass instance, String text, Object... params) {
+        appendInternal(sOutput, instance, text, params);
     }
 
-    public static void appendMethodCall(AndroidClass instance, AndroidClass[] dependencies, String methodName) {
-        appendMethodCall(instance, dependencies, methodName, null);
+    public static void appendMethodCall(AndroidClass instance, String methodName) {
+        appendMethodCall(instance, methodName, null);
     }
 
-    public static void appendMethodCall(AndroidClass instance, AndroidClass[] dependencies, String methodName, String parameters, Object... objects) {
+    public static void appendMethodCall(AndroidClass instance, String methodName, String parameters, Object... objects) {
         if (parameters == null) {
             parameters = "";
         }
-        append(instance, null, dependencies, String.format("%s.%s(%s);", instance.getInstanceName(null), methodName, String.format(parameters, objects)));
+        append(instance, String.format("%s.%s(%s);", instance.getInstanceName(null), methodName, String.format(parameters, objects)));
     }
 
     public static String splitFlags(int flags, String prefix, int[] values, String[] names) {
@@ -98,19 +96,15 @@ public class OutputBuilder {
     }
 
     public static void appendConstant(AndroidClass constant, String line) {
-        sStaticItems.add(new OutputItem(constant, constant, null, line));
+        sStaticItems.add(new OutputItem(constant, line));
     }
 
     public static void addImport(Class clazz) {
         sImports.add(clazz.getName().replace("$", "."));
     }
 
-    public static AndroidClass[] dependencyList(AndroidClass... dependencies) {
-        return dependencies;
-    }
-
-    private static void appendInternal(ArrayList<OutputItem> outputList, AndroidClass instance, AndroidClass instanceCreated, AndroidClass[] dependencies, String text, Object[] params) {
-        outputList.add(new OutputItem(instance, instanceCreated, dependencies, text != null ? String.format("        " + text + "\n", params) : null));
+    private static void appendInternal(ArrayList<OutputItem> outputList, AndroidClass instance, String text, Object[] params) {
+        outputList.add(new OutputItem(instance, text != null ? String.format("        " + text + "\n", params) : null));
 
         sInstances.add(instance);
     }
@@ -181,7 +175,7 @@ public class OutputBuilder {
 
             //Insert daisy-chain method calling and new method definition before the next block of code
             String line = String.format("        render_%d(canvas);\n    }\n\n    private void render_%1$d(Canvas canvas) {\n", sSubMethodCounter++);
-            items.add(new OutputItem(null, null, null, line));
+            items.add(new OutputItem(null, line));
 
             //Copy over the code block (or remaining part of it)
             items.addAll(sOutput.subList(i, Math.min(i + METHOD_SIZE_THRESHOLD, sOutput.size())));
@@ -250,14 +244,10 @@ public class OutputBuilder {
 
     private static class OutputItem {
         private final AndroidClass mInstance;
-        private AndroidClass[] mDependencies;
         private final String mOutput;
-        private final AndroidClass mInstanceCreated;
 
-        public OutputItem(AndroidClass instance, AndroidClass instanceCreated, AndroidClass[] dependencies, String output) {
+        public OutputItem(AndroidClass instance, String output) {
             mInstance = instance;
-            mInstanceCreated = instanceCreated;
-            mDependencies = dependencies;
             mOutput = output;
         }
 
@@ -267,14 +257,6 @@ public class OutputBuilder {
 
         public String getOutput() {
             return mOutput;
-        }
-
-        public AndroidClass getInstanceCreated() {
-            return mInstanceCreated;
-        }
-
-        public AndroidClass[] getDependencies() {
-            return mDependencies;
         }
     }
 }

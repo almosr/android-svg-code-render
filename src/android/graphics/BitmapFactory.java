@@ -42,7 +42,7 @@ public class BitmapFactory {
 
             ByteConstantArray byteArrayConstant = new ByteConstantArray(data);
             Bitmap bitmap = new Bitmap(img.getWidth(), img.getHeight());
-            OutputBuilder.append(bitmap, bitmap, null, "Bitmap %s = BitmapFactory.decodeByteArray(%s, %d, %d);", bitmap.getInstanceName(null), byteArrayConstant.getInstanceName(bitmap), offset, length);
+            OutputBuilder.append(bitmap, "Bitmap %s = BitmapFactory.decodeByteArray(%s, %d, %d);", bitmap.getInstanceName(null), byteArrayConstant.getInstanceName(bitmap), offset, length);
             return bitmap;
         } catch (IOException e) {
             throw new RuntimeException("Unable to decode embedded or linked bitmap", e);

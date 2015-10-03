@@ -14,13 +14,11 @@ import java.util.zip.ZipEntry;
  * @author Almos Rajnai
  */
 public class Version {
+    public static final Date BUILD_TIME = getClassBuildTime();
     private static final int MAJOR = 1;
     private static final int MINOR = 2;
     private static final int REVISION = 0;
-
     public static final String FULL = String.format("%d.%d.%d", MAJOR, MINOR, REVISION);
-
-    public static final Date BUILD_TIME = getClassBuildTime();
 
     /**
      * Handles files, jar entries, and deployed jar entries in a zip file (EAR).

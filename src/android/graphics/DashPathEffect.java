@@ -12,7 +12,7 @@ public class DashPathEffect extends PathEffect {
 
         FloatConstantArray intervalsConst = new FloatConstantArray(intervals);
 
-        init(OutputBuilder.dependencyList(intervalsConst), "%s, %ff",
+        init("%s, %ff",
                 intervalsConst.getInstanceName(this),
                 offset);
     }

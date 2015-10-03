@@ -36,7 +36,7 @@ public class Canvas extends AndroidClass {
         mWidth = bitmap.getWidth();
         mHeight = bitmap.getHeight();
 
-        init(OutputBuilder.dependencyList(bitmap), "%s", bitmap.getInstanceName(this));
+        init("%s", bitmap.getInstanceName(this));
     }
 
     public int getWidth() {
@@ -48,11 +48,11 @@ public class Canvas extends AndroidClass {
     }
 
     public void save() {
-        OutputBuilder.appendMethodCall(this, OutputBuilder.dependencyList(this), "save");
+        OutputBuilder.appendMethodCall(this, "save");
     }
 
     public void restore() {
-        OutputBuilder.appendMethodCall(this, OutputBuilder.dependencyList(this), "restore");
+        OutputBuilder.appendMethodCall(this, "restore");
     }
 
     public Matrix getMatrix() {
@@ -68,15 +68,15 @@ public class Canvas extends AndroidClass {
 
     public void setMatrix(Matrix matrix) {
         mMatrix = matrix;
-        OutputBuilder.appendMethodCall(this, OutputBuilder.dependencyList(this, matrix), "setMatrix", "%s", matrix.getInstanceName(this));
+        OutputBuilder.appendMethodCall(this, "setMatrix", "%s", matrix.getInstanceName(this));
     }
 
     public void drawPath(Path path, Paint fillPaint) {
-        OutputBuilder.appendMethodCall(this, OutputBuilder.dependencyList(this, path, fillPaint), "drawPath", "%s, %s", path.getInstanceName(this), fillPaint.getInstanceName(this));
+        OutputBuilder.appendMethodCall(this, "drawPath", "%s, %s", path.getInstanceName(this), fillPaint.getInstanceName(this));
     }
 
     public void concat(Matrix matrix) {
-        OutputBuilder.appendMethodCall(this, OutputBuilder.dependencyList(this, matrix), "concat", "%s", matrix.getInstanceName(this));
+        OutputBuilder.appendMethodCall(this, "concat", "%s", matrix.getInstanceName(this));
         //Simulate concatenation
         if (matrix != null) {
             getMatrixInstanceFromCanvas();
@@ -85,12 +85,12 @@ public class Canvas extends AndroidClass {
 
     private void getMatrixInstanceFromCanvas() {
         mMatrix = new Matrix(generateInstanceName(Matrix.class));
-        OutputBuilder.appendInit(mMatrix, null, null, null);
-        OutputBuilder.append(mMatrix, mMatrix, OutputBuilder.dependencyList(this), "%s = %s.getMatrix();", mMatrix.getInstanceName(this), getInstanceName(this));
+        OutputBuilder.appendInit(mMatrix, null);
+        OutputBuilder.append(mMatrix, "%s = %s.getMatrix();", mMatrix.getInstanceName(this), getInstanceName(this));
     }
 
     public void translate(float x, float y) {
-        OutputBuilder.appendMethodCall(this, OutputBuilder.dependencyList(this), "translate", "%ff, %ff", x, y);
+        OutputBuilder.appendMethodCall(this, "translate", "%ff, %ff", x, y);
 
     }
 
@@ -99,43 +99,43 @@ public class Canvas extends AndroidClass {
             throw new RuntimeException("RectF instances in generated code is not supported");
         }
 
-        OutputBuilder.appendMethodCall(this, OutputBuilder.dependencyList(this), "saveLayerAlpha", "null, %d, %s", alpha, OutputBuilder.splitFlags(saveFlags, "Canvas.", FLAG_VALUES, FLAG_NAMES));
+        OutputBuilder.appendMethodCall(this, "saveLayerAlpha", "null, %d, %s", alpha, OutputBuilder.splitFlags(saveFlags, "Canvas.", FLAG_VALUES, FLAG_NAMES));
     }
 
     public void drawBitmap(Bitmap maskedContent, float left, float top, Paint paint) {
-        OutputBuilder.appendMethodCall(this, OutputBuilder.dependencyList(this, maskedContent, paint), "drawBitmap", "%s, %ff, %ff, %s", maskedContent.getInstanceName(this), left, top, paint.getInstanceName(this));
+        OutputBuilder.appendMethodCall(this, "drawBitmap", "%s, %ff, %ff, %s", maskedContent.getInstanceName(this), left, top, paint.getInstanceName(this));
     }
 
     public void drawText(String text, float x, float y, Paint paint) {
         if (!text.isEmpty()) {
-            OutputBuilder.appendMethodCall(this, OutputBuilder.dependencyList(this, paint), "drawText", "%s, %ff, %ff, %s", TextReplacements.findTextReplacement(text), x, y, paint.getInstanceName(this));
+            OutputBuilder.appendMethodCall(this, "drawText", "%s, %ff, %ff, %s", TextReplacements.findTextReplacement(text), x, y, paint.getInstanceName(this));
         }
     }
 
     public void drawTextOnPath(String text, Path path, float x, float y, Paint paint) {
         if (!text.isEmpty()) {
-            OutputBuilder.appendMethodCall(this, OutputBuilder.dependencyList(this, paint), "drawTextOnPath", "%s, %s, %ff, %ff, %s", TextReplacements.findTextReplacement(text), path.getInstanceName(this), x, y, paint.getInstanceName(this));
+            OutputBuilder.appendMethodCall(this, "drawTextOnPath", "%s, %s, %ff, %ff, %s", TextReplacements.findTextReplacement(text), path.getInstanceName(this), x, y, paint.getInstanceName(this));
         }
     }
 
     public void clipRect(float left, float top, float right, float bottom) {
-        OutputBuilder.appendMethodCall(this, OutputBuilder.dependencyList(this), "clipRect", "%ff, %ff, %ff, %ff", left, top, right, bottom);
+        OutputBuilder.appendMethodCall(this, "clipRect", "%ff, %ff, %ff, %ff", left, top, right, bottom);
     }
 
     public void drawColor(int color) {
-        OutputBuilder.appendMethodCall(this, OutputBuilder.dependencyList(this), "drawColor", "%s", ColorReplacements.findColorReplacement(color));
+        OutputBuilder.appendMethodCall(this, "drawColor", "%s", ColorReplacements.findColorReplacement(color));
     }
 
     public void clipPath(Path clipPath) {
-        OutputBuilder.appendMethodCall(this, OutputBuilder.dependencyList(this, clipPath), "clipPath", "%s", clipPath.getInstanceName(this));
+        OutputBuilder.appendMethodCall(this, "clipPath", "%s", clipPath.getInstanceName(this));
     }
 
     public void save(int saveFlags) {
-        OutputBuilder.appendMethodCall(this, OutputBuilder.dependencyList(this), "save", "%s", OutputBuilder.splitFlags(saveFlags, "Canvas.", FLAG_VALUES, FLAG_NAMES));
+        OutputBuilder.appendMethodCall(this, "save", "%s", OutputBuilder.splitFlags(saveFlags, "Canvas.", FLAG_VALUES, FLAG_NAMES));
     }
 
     public void scale(float width, float height) {
-        OutputBuilder.appendMethodCall(this, OutputBuilder.dependencyList(this), "scale", "%ff, %ff", width, height);
+        OutputBuilder.appendMethodCall(this, "scale", "%ff, %ff", width, height);
     }
 
     @Override

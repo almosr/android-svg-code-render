@@ -30,19 +30,19 @@ public class Paint extends AndroidClass {
     }
 
     public Paint() {
-        init(null);
+        init();
     }
 
     public void setFlags(int flags) {
         checkInheritance();
         String flagString = OutputBuilder.splitFlags(flags, "Paint.", FLAG_VALUES, FLAG_NAMES);
-        OutputBuilder.appendMethodCall(this, OutputBuilder.dependencyList(this), "setFlags", "%s", flagString);
+        OutputBuilder.appendMethodCall(this, "setFlags", "%s", flagString);
     }
 
     public void setStyle(Style style) {
         checkInheritance();
         OutputBuilder.addImport(Paint.class);
-        OutputBuilder.appendMethodCall(this, OutputBuilder.dependencyList(this), "setStyle", "Paint.Style.%s", style.name());
+        OutputBuilder.appendMethodCall(this, "setStyle", "Paint.Style.%s", style.name());
     }
 
     public float getTextSize() {
@@ -52,7 +52,7 @@ public class Paint extends AndroidClass {
     public void setTextSize(float textSize) {
         checkInheritance();
         mTextSize = textSize;
-        OutputBuilder.appendMethodCall(this, OutputBuilder.dependencyList(this), "setTextSize", "%ff", textSize);
+        OutputBuilder.appendMethodCall(this, "setTextSize", "%ff", textSize);
     }
 
     public Shader getShader() {
@@ -62,7 +62,7 @@ public class Paint extends AndroidClass {
     public void setShader(Shader shader) {
         checkInheritance();
         mShader = shader;
-        OutputBuilder.appendMethodCall(this, OutputBuilder.dependencyList(this, shader), "setShader", "%s", shader.getInstanceName(this));
+        OutputBuilder.appendMethodCall(this, "setShader", "%s", shader.getInstanceName(this));
     }
 
     public float measureText(String text) {
@@ -76,57 +76,57 @@ public class Paint extends AndroidClass {
 
     public void setStrokeWidth(float strokeWidth) {
         checkInheritance();
-        OutputBuilder.appendMethodCall(this, OutputBuilder.dependencyList(this), "setStrokeWidth", "%ff", strokeWidth);
+        OutputBuilder.appendMethodCall(this, "setStrokeWidth", "%ff", strokeWidth);
     }
 
     public void setStrokeCap(Cap strokeCap) {
         checkInheritance();
-        OutputBuilder.appendMethodCall(this, OutputBuilder.dependencyList(this), "setStrokeCap", "Paint.Cap.%s", strokeCap.name());
+        OutputBuilder.appendMethodCall(this, "setStrokeCap", "Paint.Cap.%s", strokeCap.name());
     }
 
     public void setStrokeJoin(Join strokeJoin) {
         checkInheritance();
-        OutputBuilder.appendMethodCall(this, OutputBuilder.dependencyList(this), "setStrokeJoin", "Paint.Join.%s", strokeJoin.name());
+        OutputBuilder.appendMethodCall(this, "setStrokeJoin", "Paint.Join.%s", strokeJoin.name());
     }
 
     public void setStrokeMiter(Float strokeMiter) {
         checkInheritance();
-        OutputBuilder.appendMethodCall(this, OutputBuilder.dependencyList(this), "setStrokeMiter", "%ff", strokeMiter);
+        OutputBuilder.appendMethodCall(this, "setStrokeMiter", "%ff", strokeMiter);
     }
 
     public void setPathEffect(PathEffect pathEffect) {
         checkInheritance();
         if (pathEffect != null) {
             OutputBuilder.addImport(pathEffect.getClass());
-            OutputBuilder.appendMethodCall(this, OutputBuilder.dependencyList(this), "setPathEffect", "%s", pathEffect.getClass().getSimpleName());
+            OutputBuilder.appendMethodCall(this, "setPathEffect", "%s", pathEffect.getClass().getSimpleName());
         } else {
-            OutputBuilder.appendMethodCall(this, OutputBuilder.dependencyList(this), "setPathEffect", "null");
+            OutputBuilder.appendMethodCall(this, "setPathEffect", "null");
         }
     }
 
     public void setStrikeThruText(boolean strikeThruText) {
         checkInheritance();
-        OutputBuilder.appendMethodCall(this, OutputBuilder.dependencyList(this), "setStrikeThruText", "%b", strikeThruText);
+        OutputBuilder.appendMethodCall(this, "setStrikeThruText", "%b", strikeThruText);
     }
 
     public void setUnderlineText(boolean underlineText) {
         checkInheritance();
-        OutputBuilder.appendMethodCall(this, OutputBuilder.dependencyList(this), "setUnderlineText", "%b", underlineText);
+        OutputBuilder.appendMethodCall(this, "setUnderlineText", "%b", underlineText);
     }
 
     public void setTypeface(Typeface typeface) {
         checkInheritance();
         OutputBuilder.addImport(Typeface.class);
-        OutputBuilder.appendMethodCall(this, OutputBuilder.dependencyList(this, typeface), "setTypeface", "%s", typeface.getInstanceName(this));
+        OutputBuilder.appendMethodCall(this, "setTypeface", "%s", typeface.getInstanceName(this));
     }
 
     public void setColor(int color) {
         checkInheritance();
-        OutputBuilder.appendMethodCall(this, OutputBuilder.dependencyList(this), "setColor", "%s", ColorReplacements.findColorReplacement(color));
+        OutputBuilder.appendMethodCall(this, "setColor", "%s", ColorReplacements.findColorReplacement(color));
     }
 
     public void getTextPath(String text, int start, int end, float x, float y, Path path) {
-        OutputBuilder.appendMethodCall(this, OutputBuilder.dependencyList(this, path), "getTextPath", "%s, %d, %d, %ff, %ff, %s", text, start, end, x, y, path.getInstanceName(this));
+        OutputBuilder.appendMethodCall(this, "getTextPath", "%s, %d, %d, %ff, %ff, %s", text, start, end, x, y, path.getInstanceName(this));
     }
 
     @Override
@@ -146,8 +146,8 @@ public class Paint extends AndroidClass {
         //But since this instance will be changed now we need a real new Paint instance, so we create it now.
         if (mParent != null) {
             //This instance is referring to the parent class, must be initialized from that
-            init(OutputBuilder.dependencyList(mParent));
-            OutputBuilder.append(this, this, OutputBuilder.dependencyList(mParent), "%s.set(%s);", getInstanceName(null), mParent.getInstanceName(this));
+            init();
+            OutputBuilder.append(this, "%s.set(%s);", getInstanceName(null), mParent.getInstanceName(this));
             mParent = null;
         }
     }

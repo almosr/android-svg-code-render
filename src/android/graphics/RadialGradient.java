@@ -17,7 +17,7 @@ public class RadialGradient extends Shader {
         IntConstantArray colourConst = new IntConstantArray(colours, true);
         FloatConstantArray posConst = new FloatConstantArray(positions);
 
-        init(OutputBuilder.dependencyList(colourConst, posConst), "%ff, %ff, %ff, %s, %s, %s",
+        init("%ff, %ff, %ff, %s, %s, %s",
                 cx, cy, r,
                 colourConst.getInstanceName(this),
                 posConst.getInstanceName(this),

@@ -37,7 +37,7 @@ public class Typeface extends AndroidClass {
         OutputBuilder.addImport(Typeface.class);
 
         String styleFlags = OutputBuilder.splitFlags(typefaceStyle, "Typeface.", STYLE_VALUES, STYLE_NAMES);
-        OutputBuilder.appendInit(newTypeface, newTypeface, OutputBuilder.dependencyList(family), "%s = Typeface.create(%s, %s);", newTypeface.mInstanceName, family.getInstanceName(newTypeface), styleFlags);
+        OutputBuilder.appendInit(newTypeface, "%s = Typeface.create(%s, %s);", newTypeface.mInstanceName, family.getInstanceName(newTypeface), styleFlags);
 
         return newTypeface;
 
