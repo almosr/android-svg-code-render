@@ -144,8 +144,8 @@ public class Main {
 
         SVG svg = SVG.getFromInputStream(is);
 
-        OutputBuilder.sWidth = svg.getDocumentWidth();
-        OutputBuilder.sHeight = svg.getDocumentHeight();
+        OutputBuilder.setWidth(svg.getDocumentWidth());
+        OutputBuilder.setHeight(svg.getDocumentHeight());
 
         //Main canvas object is created with the static instance name from the method parameters
         Canvas canvas = new Canvas(CANVAS_PARAMETER_NAME, 1, 1, true);

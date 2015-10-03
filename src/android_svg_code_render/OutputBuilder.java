@@ -9,8 +9,8 @@ import java.util.*;
  */
 public class OutputBuilder {
     private static final int METHOD_SIZE_THRESHOLD = 3000;
-    public static float sWidth;
-    public static float sHeight;
+    private static float sWidth;
+    private static float sHeight;
     private static ArrayList<OutputItem> sStaticItems;
     private static ArrayList<OutputItem> sInitOutput;
     private static ArrayList<OutputItem> sOutput;
@@ -258,5 +258,13 @@ public class OutputBuilder {
         public String getOutput() {
             return mOutput;
         }
+    }
+
+    public static void setWidth(float width) {
+        sWidth = width;
+    }
+
+    public static void setHeight(float height) {
+        sHeight = height;
     }
 }
