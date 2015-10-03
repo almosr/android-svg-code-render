@@ -14,13 +14,13 @@ import android_svg_code_render.TextReplacements;
 public class Canvas extends AndroidClass {
     public static final int HAS_ALPHA_LAYER_SAVE_FLAG = 4;
     public static final int MATRIX_SAVE_FLAG = 1;
-    private static final String TAG = Canvas.class.getName();
-    private Matrix mMatrix;
-    private int[] flagValues = {MATRIX_SAVE_FLAG, HAS_ALPHA_LAYER_SAVE_FLAG};
-    private String[] flagNames = {"MATRIX_SAVE_FLAG", "HAS_ALPHA_LAYER_SAVE_FLAG"};
-    private int mWidth;
-    private int mHeight;
+    private static final int[] FLAG_VALUES = {MATRIX_SAVE_FLAG, HAS_ALPHA_LAYER_SAVE_FLAG};
+    private static final String[] FLAG_NAMES = {"MATRIX_SAVE_FLAG", "HAS_ALPHA_LAYER_SAVE_FLAG"};
 
+    private static final String TAG = Canvas.class.getName();
+    private final int mWidth;
+    private final int mHeight;
+    private Matrix mMatrix;
     //This flag is set if the Canvas is the root class which is referring to all other classes in the output.
     private boolean mRoot;
 
@@ -99,7 +99,7 @@ public class Canvas extends AndroidClass {
             throw new RuntimeException("RectF instances in generated code is not supported");
         }
 
-        OutputBuilder.appendMethodCall(this, OutputBuilder.dependencyList(this), "saveLayerAlpha", "null, %d, %s", alpha, OutputBuilder.splitFlags(saveFlags, "Canvas.", flagValues, flagNames));
+        OutputBuilder.appendMethodCall(this, OutputBuilder.dependencyList(this), "saveLayerAlpha", "null, %d, %s", alpha, OutputBuilder.splitFlags(saveFlags, "Canvas.", FLAG_VALUES, FLAG_NAMES));
     }
 
     public void drawBitmap(Bitmap maskedContent, float left, float top, Paint paint) {
@@ -131,7 +131,7 @@ public class Canvas extends AndroidClass {
     }
 
     public void save(int saveFlags) {
-        OutputBuilder.appendMethodCall(this, OutputBuilder.dependencyList(this), "save", "%s", OutputBuilder.splitFlags(saveFlags, "Canvas.", flagValues, flagNames));
+        OutputBuilder.appendMethodCall(this, OutputBuilder.dependencyList(this), "save", "%s", OutputBuilder.splitFlags(saveFlags, "Canvas.", FLAG_VALUES, FLAG_NAMES));
     }
 
     public void scale(float width, float height) {

@@ -9,8 +9,8 @@ import android_svg_code_render.OutputBuilder;
  * @author Almos Rajnai
  */
 public class Bitmap extends AndroidClass {
-    private int mWidth;
-    private int mHeight;
+    private final int mWidth;
+    private final int mHeight;
 
     public Bitmap(int width, int height) {
         mWidth = width;

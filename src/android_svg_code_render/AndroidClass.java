@@ -13,7 +13,7 @@ import java.util.HashSet;
  */
 public abstract class AndroidClass {
 
-    private static HashMap<Class, Integer> sNameCache = new HashMap<>();
+    private static final HashMap<Class, Integer> sNameCache = new HashMap<>();
 
     private HashSet<AndroidClass> mUsedBy = new HashSet<>();
     protected String mInstanceName;

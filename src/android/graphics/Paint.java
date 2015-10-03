@@ -13,12 +13,11 @@ public class Paint extends AndroidClass {
     public static final int ANTI_ALIAS_FLAG = 1;
     public static final int DEV_KERN_TEXT_FLAG = 2;
     public static final int SUBPIXEL_TEXT_FLAG = 4;
+    private static final int[] FLAG_VALUES = {ANTI_ALIAS_FLAG, DEV_KERN_TEXT_FLAG, SUBPIXEL_TEXT_FLAG};
+    private static final String[] FLAG_NAMES = {"ANTI_ALIAS_FLAG", "DEV_KERN_TEXT_FLAG", "SUBPIXEL_TEXT_FLAG"};
 
-    private static int[] flagValues = {ANTI_ALIAS_FLAG, DEV_KERN_TEXT_FLAG, SUBPIXEL_TEXT_FLAG};
-    private static String[] flagNames = {"ANTI_ALIAS_FLAG", "DEV_KERN_TEXT_FLAG", "SUBPIXEL_TEXT_FLAG"};
     private float mTextSize;
     private Shader mShader;
-    private int mColor;
 
     private Paint mParent;
 
@@ -36,7 +35,7 @@ public class Paint extends AndroidClass {
 
     public void setFlags(int flags) {
         checkInheritance();
-        String flagString = OutputBuilder.splitFlags(flags, "Paint.", flagValues, flagNames);
+        String flagString = OutputBuilder.splitFlags(flags, "Paint.", FLAG_VALUES, FLAG_NAMES);
         OutputBuilder.appendMethodCall(this, OutputBuilder.dependencyList(this), "setFlags", "%s", flagString);
     }
 
@@ -121,13 +120,8 @@ public class Paint extends AndroidClass {
         OutputBuilder.appendMethodCall(this, OutputBuilder.dependencyList(this, typeface), "setTypeface", "%s", typeface.getInstanceName(this));
     }
 
-    public int getColor() {
-        return mColor;
-    }
-
     public void setColor(int color) {
         checkInheritance();
-        mColor = color;
         OutputBuilder.appendMethodCall(this, OutputBuilder.dependencyList(this), "setColor", "%s", ColorReplacements.findColorReplacement(color));
     }
 

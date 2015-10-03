@@ -12,7 +12,7 @@ import java.util.ArrayList;
 public class TextReplacements {
     private static final String TAG = TextReplacement.class.getName();
 
-    private static ArrayList<TextReplacement> sTextReplacements = new ArrayList<>();
+    private final static ArrayList<TextReplacement> sTextReplacements = new ArrayList<>();
 
     public static void addTextReplacement(String text, String variable) {
         sTextReplacements.add(new TextReplacement(text, variable));
@@ -38,8 +38,8 @@ public class TextReplacements {
     }
 
     private static class TextReplacement {
-        String text;
-        String parameter;
+        final String text;
+        final String parameter;
         boolean used;
 
         public TextReplacement(String text, String parameter) {

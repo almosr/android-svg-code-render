@@ -12,7 +12,7 @@ import java.util.ArrayList;
 public class ColorReplacements {
     private static final String TAG = ColorReplacements.class.getName();
 
-    private static ArrayList<ColorReplacement> sColorReplacements = new ArrayList<>();
+    private final static ArrayList<ColorReplacement> sColorReplacements = new ArrayList<>();
 
     public static void addColorReplacement(int color, String variable) {
         sColorReplacements.add(new ColorReplacement(color, variable));
@@ -38,8 +38,8 @@ public class ColorReplacements {
     }
 
     private static class ColorReplacement {
-        int color;
-        String parameter;
+        final int color;
+        final String parameter;
         boolean used;
 
         public ColorReplacement(int color, String parameter) {

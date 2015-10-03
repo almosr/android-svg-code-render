@@ -16,7 +16,7 @@ import java.util.Locale;
  * @author Almos Rajnai
  */
 public class Main {
-    public static final String CANVAS_PARAMETER_NAME = "canvas";
+    private static final String CANVAS_PARAMETER_NAME = "canvas";
 
     private static final String FILE_TEMPLATE =
             "package %s;\n\n" +                       //Package name
@@ -168,11 +168,11 @@ public class Main {
         System.out.println("Usage: android-svg-code-render <inputfile.svg> [-p <package name>] [-c <class name>] [-o <outputfile.java>] [-t <template file>] [-rt <text replacement file>] [-rc <color replacement file>]\n");
     }
 
-    public static void error(String msg, Object... params) {
+    private static void error(String msg, Object... params) {
         error(null, msg, params);
     }
 
-    public static void error(Exception e, String msg, Object... params) {
+    private static void error(Exception e, String msg, Object... params) {
         String error = "";
         if (e != null) {
             error = String.format(": %s - %s", e.getClass().getName(), e.getMessage());

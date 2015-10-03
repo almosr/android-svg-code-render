@@ -19,8 +19,8 @@ public class Typeface extends AndroidClass {
     public static final int BOLD = 1;
     public static final int ITALIC = 2;
     public static final int BOLD_ITALIC = 3;
-    private static int[] styleValues = {NORMAL, BOLD, ITALIC};
-    private static String[] styleNames = {"NORMAL", "BOLD", "ITALIC"};
+    private static final int[] STYLE_VALUES = {NORMAL, BOLD, ITALIC};
+    private static final String[] STYLE_NAMES = {"NORMAL", "BOLD", "ITALIC"};
 
     public Typeface(String instanceName) {
         mInstanceName = instanceName;
@@ -36,7 +36,7 @@ public class Typeface extends AndroidClass {
 
         OutputBuilder.addImport(Typeface.class);
 
-        String styleFlags = OutputBuilder.splitFlags(typefaceStyle, "Typeface.", styleValues, styleNames);
+        String styleFlags = OutputBuilder.splitFlags(typefaceStyle, "Typeface.", STYLE_VALUES, STYLE_NAMES);
         OutputBuilder.appendInit(newTypeface, newTypeface, OutputBuilder.dependencyList(family), "%s = Typeface.create(%s, %s);", newTypeface.mInstanceName, family.getInstanceName(newTypeface), styleFlags);
 
         return newTypeface;
