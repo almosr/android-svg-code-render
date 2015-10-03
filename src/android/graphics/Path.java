@@ -33,8 +33,8 @@ public class Path extends AndroidClass {
         //TODO: simulate computeBound in Path class
     }
 
-    public void transform(Matrix transform) {
-        throw new RuntimeException("Dummy function");
+    public void transform(Matrix matrix) {
+        OutputBuilder.appendMethodCall(this, OutputBuilder.dependencyList(this, matrix), "transform", "%s", matrix.getInstanceName(this));
     }
 
     public void moveTo(float x, float y) {
