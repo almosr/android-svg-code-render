@@ -27,7 +27,8 @@ public class Typeface extends AndroidClass {
     }
 
     public static Typeface createFromAsset(AssetManager assetManager, String s) {
-        throw new RuntimeException("Dummy function");
+        //TODO: try to embed font-resolving
+        throw new RuntimeException("Typeface.createFromAsset() method is not supported.");
     }
 
     public static Typeface create(Typeface family, int typefaceStyle) {
