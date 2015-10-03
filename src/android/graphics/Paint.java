@@ -166,7 +166,7 @@ public class Paint extends AndroidClass {
     }
 
     public void getTextPath(String text, int start, int end, float x, float y, Path path) {
-        throw new RuntimeException("Dummy function");
+        OutputBuilder.appendMethodCall(this, OutputBuilder.dependencyList(this, path), "getTextPath", "%s, %d, %d, %ff, %ff, %s", text, start, end, x, y, path.getInstanceName(this));
     }
 
     @Override
