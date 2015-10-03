@@ -40,11 +40,13 @@ public class Bitmap extends AndroidClass {
     }
 
     public void getPixels(int[] pixels, int offset, int stride, int x, int y, int width, int height) {
-        throw new RuntimeException("Dummy function");
+        //TODO: getPixels is needed for bitmap mask
+        throw new RuntimeException("Bitmap.getPixels() method is not supported. (Used by bitmap masks.)");
     }
 
     public void setPixels(int[] pixels, int offset, int stride, int x, int y, int width, int height) {
-        throw new RuntimeException("Dummy function");
+        //TODO: setPixels is needed for bitmap mask
+        throw new RuntimeException("Bitmap.setPixels() method is not supported. (Used by bitmap masks.)");
     }
 
     public enum Config {ARGB_8888}
