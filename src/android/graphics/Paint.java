@@ -18,14 +18,6 @@ public class Paint extends AndroidClass {
     private static String[] flagNames = {"ANTI_ALIAS_FLAG", "DEV_KERN_TEXT_FLAG", "SUBPIXEL_TEXT_FLAG"};
     private float mTextSize;
     private Shader mShader;
-    private float mStrokeWidth;
-    private Cap mStrokeCap;
-    private Join mStrokeJoin;
-    private Float mStrokeMiter;
-    private PathEffect mPathEffect;
-    private boolean mStrikeThruText;
-    private boolean mUnderlineText;
-    private Typeface mTypeface;
     private int mColor;
 
     private Paint mParent;
@@ -83,45 +75,28 @@ public class Paint extends AndroidClass {
         //TODO: getTextBounds method in Paint
     }
 
-    public float getStrokeWidth() {
-        return mStrokeWidth;
-    }
-
     public void setStrokeWidth(float strokeWidth) {
         checkInheritance();
-        mStrokeWidth = strokeWidth;
         OutputBuilder.appendMethodCall(this, OutputBuilder.dependencyList(this), "setStrokeWidth", "%ff", strokeWidth);
     }
 
     public void setStrokeCap(Cap strokeCap) {
         checkInheritance();
-        mStrokeCap = strokeCap;
         OutputBuilder.appendMethodCall(this, OutputBuilder.dependencyList(this), "setStrokeCap", "Paint.Cap.%s", strokeCap.name());
     }
 
     public void setStrokeJoin(Join strokeJoin) {
         checkInheritance();
-        mStrokeJoin = strokeJoin;
         OutputBuilder.appendMethodCall(this, OutputBuilder.dependencyList(this), "setStrokeJoin", "Paint.Join.%s", strokeJoin.name());
-    }
-
-    public Float getStrokeMiter() {
-        return mStrokeMiter;
     }
 
     public void setStrokeMiter(Float strokeMiter) {
         checkInheritance();
-        mStrokeMiter = strokeMiter;
         OutputBuilder.appendMethodCall(this, OutputBuilder.dependencyList(this), "setStrokeMiter", "%ff", strokeMiter);
-    }
-
-    public PathEffect getPathEffect() {
-        return mPathEffect;
     }
 
     public void setPathEffect(PathEffect pathEffect) {
         checkInheritance();
-        mPathEffect = pathEffect;
         if (pathEffect != null) {
             OutputBuilder.addImport(pathEffect.getClass());
             OutputBuilder.appendMethodCall(this, OutputBuilder.dependencyList(this), "setPathEffect", "%s", pathEffect.getClass().getSimpleName());
@@ -130,22 +105,12 @@ public class Paint extends AndroidClass {
         }
     }
 
-    public boolean isStrikeThruText() {
-        return mStrikeThruText;
-    }
-
     public void setStrikeThruText(boolean strikeThruText) {
         checkInheritance();
-        mStrikeThruText = strikeThruText;
-    }
-
-    public boolean isUnderlineText() {
-        return mUnderlineText;
     }
 
     public void setUnderlineText(boolean underlineText) {
         checkInheritance();
-        mUnderlineText = underlineText;
         OutputBuilder.appendMethodCall(this, OutputBuilder.dependencyList(this), "setUnderlineText", "%b", underlineText);
     }
 
