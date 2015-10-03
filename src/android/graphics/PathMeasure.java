@@ -5,10 +5,9 @@ package android.graphics;
  */
 public class PathMeasure {
     public PathMeasure(Path path, boolean b) {
-
     }
 
     public float getLength() {
-        throw new RuntimeException("Dummy function");
+        throw new RuntimeException("PathMeasure.getLength() method is not supported.");
     }
 }
