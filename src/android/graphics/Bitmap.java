@@ -12,7 +12,7 @@ public class Bitmap extends AndroidClass {
     private int mWidth;
     private int mHeight;
 
-    private Bitmap(int width, int height, Config config) {
+    public Bitmap(int width, int height) {
         mWidth = width;
         mHeight = height;
 
@@ -22,22 +22,20 @@ public class Bitmap extends AndroidClass {
     }
 
     public static Bitmap createBitmap(int width, int height, Config bitmapConfig) {
-        Bitmap bitmap = new Bitmap(width, height, bitmapConfig);
+        Bitmap bitmap = new Bitmap(width, height);
         OutputBuilder.append(bitmap, bitmap, null, "Bitmap %s = Bitmap.createBitmap(%d, %d, Config.%s);", bitmap.getInstanceName(null), width, height, bitmapConfig.name());
         return bitmap;
     }
 
     public void recycle() {
-        throw new RuntimeException("Dummy function");
+        //No need to do anything for recycling bitmaps
     }
 
     public int getWidth() {
-        //TODO: track getWidth
         return mWidth;
     }
 
     public int getHeight() {
-        //TODO: track getHeight
         return mHeight;
     }
 
