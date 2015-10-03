@@ -9,17 +9,13 @@ import android_svg_code_render.OutputBuilder;
  * @author Almos Rajnai
  */
 public class Shader extends AndroidClass {
-    private Matrix mLocalMatrix;
 
-    public void getLocalMatrix(Matrix localM) {
-        if (localM != null) {
-            mLocalMatrix = localM;
-        }
+    public void getLocalMatrix(Matrix matrix) {
+        OutputBuilder.appendMethodCall(this, OutputBuilder.dependencyList(this, matrix), "getLocalMatrix", "%s", matrix.getInstanceName(this));
     }
 
-    public void setLocalMatrix(Matrix localM) {
-        mLocalMatrix = localM;
-        OutputBuilder.appendMethodCall(this, OutputBuilder.dependencyList(this, localM), "setLocalMatrix", "%s", localM.getInstanceName(this));
+    public void setLocalMatrix(Matrix matrix) {
+        OutputBuilder.appendMethodCall(this, OutputBuilder.dependencyList(this, matrix), "setLocalMatrix", "%s", matrix.getInstanceName(this));
     }
 
     public enum TileMode {
