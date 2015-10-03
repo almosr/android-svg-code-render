@@ -140,7 +140,7 @@ public class Canvas extends AndroidClass {
 
     @Override
     public boolean isUsed() {
-        //Root canvas instamce must not be removed
+        //Root canvas instance must not be removed
         return mRoot || super.isUsed();
     }
 }
