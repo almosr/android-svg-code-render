@@ -107,6 +107,7 @@ public class Paint extends AndroidClass {
 
     public void setStrikeThruText(boolean strikeThruText) {
         checkInheritance();
+        OutputBuilder.appendMethodCall(this, OutputBuilder.dependencyList(this), "setStrikeThruText", "%b", strikeThruText);
     }
 
     public void setUnderlineText(boolean underlineText) {
