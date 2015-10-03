@@ -54,10 +54,6 @@ public class Paint extends AndroidClass {
         OutputBuilder.appendMethodCall(this, OutputBuilder.dependencyList(this), "setStyle", "Paint.Style.%s", style.name());
     }
 
-    public void setTypeface(int typeface) {
-        throw new RuntimeException("Dummy function");
-    }
-
     public float getTextSize() {
         return mTextSize;
     }

@@ -5,6 +5,6 @@ package android.content;
  */
 public class Context {
     public Context getResources() {
-        throw new RuntimeException("Dummy function");
+        return this;
     }
 }

@@ -7,6 +7,6 @@ import java.io.InputStream;
  */
 public class Resources {
     public InputStream openRawResource(int resourceId) {
-        throw new RuntimeException("Dummy function");
+        throw new RuntimeException("Resources.openRawResources() method is not implemented.");
     }
 }
