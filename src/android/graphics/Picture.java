@@ -5,10 +5,10 @@ package android.graphics;
  */
 public class Picture {
     public Canvas beginRecording(int widthInPixels, int heightInPixels) {
-        throw new RuntimeException("Dummy function");
+        throw new RuntimeException("Picture.beginRecording() method is not implemented.");
     }
 
     public void endRecording() {
-        throw new RuntimeException("Dummy function");
+        throw new RuntimeException("Picture.endRecording() method is not implemented.");
     }
 }
