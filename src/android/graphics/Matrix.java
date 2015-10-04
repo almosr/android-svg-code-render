@@ -62,27 +62,27 @@ public class Matrix extends AndroidClass {
     }
 
     public void postScale(float rx, float ry) {
-        throw new RuntimeException("Dummy function");
+        OutputBuilder.appendMethodCall(this, "postScale", "%ff, %ff", rx, ry);
     }
 
     public void postRotate(float degrees) {
-        throw new RuntimeException("Dummy function");
+        OutputBuilder.appendMethodCall(this, "postRotate", "%ff", degrees);
     }
 
     public void postTranslate(float cx, float cy) {
-        throw new RuntimeException("Dummy function");
+        OutputBuilder.appendMethodCall(this, "postTranslate", "%ff, %ff", cx, cy);
     }
 
     public void preRotate(float degrees) {
-        throw new RuntimeException("Dummy function");
+        OutputBuilder.appendMethodCall(this, "preRotate", "%ff", degrees);
     }
 
     public void reset() {
-        throw new RuntimeException("Dummy function");
+        OutputBuilder.appendMethodCall(this, "reset");
     }
 
     public void preSkew(float kx, float ky) {
-        throw new RuntimeException("Dummy function");
+        OutputBuilder.appendMethodCall(this, "preSkew", "%ff, %ff", kx, ky);
     }
 
     public void setValues(float[] values) {
@@ -92,6 +92,6 @@ public class Matrix extends AndroidClass {
     }
 
     public void preRotate(float degree, float cx, float cy) {
-        throw new RuntimeException("Dummy function");
+        OutputBuilder.appendMethodCall(this, "preRotate", "%ff, %ff, %ff", degree, cx, cy);
     }
 }
