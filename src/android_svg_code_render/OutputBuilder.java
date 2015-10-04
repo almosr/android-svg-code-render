@@ -242,6 +242,14 @@ public class OutputBuilder {
         return output.toString();
     }
 
+    public static void setWidth(float width) {
+        sWidth = width;
+    }
+
+    public static void setHeight(float height) {
+        sHeight = height;
+    }
+
     private static class OutputItem {
         private final AndroidClass mInstance;
         private final String mOutput;
@@ -258,13 +266,5 @@ public class OutputBuilder {
         public String getOutput() {
             return mOutput;
         }
-    }
-
-    public static void setWidth(float width) {
-        sWidth = width;
-    }
-
-    public static void setHeight(float height) {
-        sHeight = height;
     }
 }
