@@ -15,6 +15,7 @@ public abstract class AndroidClass {
 
     private static final HashMap<Class, Integer> sNameCache = new HashMap<>();
     protected String mInstanceName;
+    protected AndroidClass mParent;
     private HashSet<AndroidClass> mUsedBy = new HashSet<>();
 
     public static String generateInstanceName(Class clazz) {
@@ -90,5 +91,26 @@ public abstract class AndroidClass {
 
     public String getResetMethod() {
         return String.format("%s.reset();", getInstanceName(null));
+    }
+
+    protected void checkInheritance() {
+        //This function is called when a property is set from the outside.
+        //If the instance is "inherited", that means it was not initialized and represents the same
+        //implementation class instance which was used in the constructor as parameter.
+        //But since this instance will be changed now we need a real new instance, so we create it now.
+        if (mParent != null) {
+            //This instance is referring to the parent class, must be initialized from that
+            init();
+            OutputBuilder.append(this, "%s.set(%s);", getInstanceName(null), mParent.getInstanceName(this));
+            mParent = null;
+        }
+    }
+
+    protected void setParent(AndroidClass parent) {
+        //Inherited instance is not initialized in the output unless it is used by through other functions
+        mParent = parent;
+
+        //Use the same name as the source instance unless something changes the fields from the outside
+        mInstanceName = parent.mInstanceName;
     }
 }

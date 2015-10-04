@@ -19,14 +19,8 @@ public class Paint extends AndroidClass {
     private float mTextSize;
     private Shader mShader;
 
-    private Paint mParent;
-
     public Paint(Paint paint) {
-        //Inherited Paint instance is not initialized in the output unless it is used by through other functions
-        mParent = paint;
-
-        //Use the same name as the source Paint object unless something changes the fields from the outside
-        mInstanceName = paint.mInstanceName;
+        setParent(paint);
     }
 
     public Paint() {
@@ -137,19 +131,6 @@ public class Paint extends AndroidClass {
         }
 
         return super.getInstanceName(referringClass);
-    }
-
-    private void checkInheritance() {
-        //This function is called when a property is set from the outside.
-        //If the instance is "inherited", that means it was not initialized and represents the same
-        //Paint instance which was used in the constructor as parameter.
-        //But since this instance will be changed now we need a real new Paint instance, so we create it now.
-        if (mParent != null) {
-            //This instance is referring to the parent class, must be initialized from that
-            init();
-            OutputBuilder.append(this, "%s.set(%s);", getInstanceName(null), mParent.getInstanceName(this));
-            mParent = null;
-        }
     }
 
     public enum Style {
