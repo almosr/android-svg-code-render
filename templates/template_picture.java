@@ -19,9 +19,15 @@ public class %s {
         Picture picture = new Picture();
         Canvas canvas = picture.beginRecording(width, height);
         canvas.scale(width / WIDTH, height / HEIGHT);
+		
+        render(canvas);
 
-%s
         picture.endRecording();
         return picture;
+    }
+	
+    private void render(Canvas canvas) {
+
+%s
     }
 }
