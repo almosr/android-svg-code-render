@@ -40,7 +40,7 @@ public class BitmapFactory {
             //Try to decode the image to find out bitmap dimensions
             BufferedImage img = ImageIO.read(new ByteArrayInputStream(data));
 
-            ByteConstantArray byteArrayConstant = new ByteConstantArray(data);
+            ByteConstantArray byteArrayConstant = ByteConstantArray.getInstance(data);
             Bitmap bitmap = new Bitmap(img.getWidth(), img.getHeight());
             OutputBuilder.append(bitmap, "Bitmap %s = BitmapFactory.decodeByteArray(%s, %d, %d);", bitmap.getInstanceName(null), byteArrayConstant.getInstanceName(bitmap), offset, length);
             return bitmap;

@@ -10,7 +10,7 @@ public class DashPathEffect extends PathEffect {
     public DashPathEffect(float[] intervals, float offset) {
         OutputBuilder.addImport(Shader.class);
 
-        FloatConstantArray intervalsConst = new FloatConstantArray(intervals);
+        FloatConstantArray intervalsConst = FloatConstantArray.getInstance(intervals);
 
         init("%s, %ff",
                 intervalsConst.getInstanceName(this),

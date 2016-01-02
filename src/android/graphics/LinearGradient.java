@@ -14,8 +14,8 @@ public class LinearGradient extends Shader {
     public LinearGradient(float x1, float y1, float x2, float y2, int[] colours, float[] positions, Shader.TileMode tileMode) {
         OutputBuilder.addImport(Shader.class);
 
-        IntConstantArray colourConst = new IntConstantArray(colours, true);
-        FloatConstantArray posConst = new FloatConstantArray(positions);
+        IntConstantArray colourConst = IntConstantArray.getInstance(colours);
+        FloatConstantArray posConst = FloatConstantArray.getInstance(positions);
 
         init("%ff, %ff, %ff, %ff, %s, %s, %s",
                 x1, y1, x2, y2,

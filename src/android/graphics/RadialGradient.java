@@ -14,8 +14,8 @@ public class RadialGradient extends Shader {
     public RadialGradient(float cx, float cy, float r, int[] colours, float[] positions, TileMode tileMode) {
         OutputBuilder.addImport(Shader.class);
 
-        IntConstantArray colourConst = new IntConstantArray(colours, true);
-        FloatConstantArray posConst = new FloatConstantArray(positions);
+        IntConstantArray colourConst = IntConstantArray.getInstance(colours);
+        FloatConstantArray posConst = FloatConstantArray.getInstance(positions);
 
         init("%ff, %ff, %ff, %s, %s, %s",
                 cx, cy, r,

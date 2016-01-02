@@ -43,7 +43,7 @@ public class Matrix extends AndroidClass {
 
     public void mapPoints(float[] points) {
         checkInheritance();
-        FloatConstantArray constant = new FloatConstantArray(points);
+        FloatConstantArray constant = FloatConstantArray.getInstance(points);
         OutputBuilder.appendMethodCall(this, "mapPoints", constant.getInstanceName(this));
     }
 
@@ -87,7 +87,7 @@ public class Matrix extends AndroidClass {
 
     public void setValues(float[] values) {
         checkInheritance();
-        FloatConstantArray constant = new FloatConstantArray(values);
+        FloatConstantArray constant = FloatConstantArray.getInstance(values);
         OutputBuilder.appendMethodCall(this, "setValues", constant.getInstanceName(this));
     }
 
