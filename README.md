@@ -120,8 +120,8 @@ There are some issues which needed to be addressed sooner or later:
 This project was built on the source code of the great androidsvg library from **Paul LeBeau**.
 **Big thanks to him!**
 
-You can find the project page for the original library here (while Google keeps it alive):
-http://code.google.com/p/androidsvg
+You can find the project page for the original library here:
+https://github.com/BigBadaboom/androidsvg
 
 ## Code license
 android-svg-code-render is licensed under the [**Apache License v2.0**](http://www.apache.org/licenses/LICENSE-2.0).
