@@ -16,51 +16,27 @@
 
 package com.caverock.androidsvg;
 
-import java.io.BufferedInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Set;
-import java.util.zip.GZIPInputStream;
-
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.parsers.SAXParser;
-import javax.xml.parsers.SAXParserFactory;
-
+import android.graphics.Matrix;
+import android.util.Log;
+import com.caverock.androidsvg.CSSParser.MediaType;
+import com.caverock.androidsvg.SVG.*;
+import com.caverock.androidsvg.SVG.Style.TextDecoration;
+import com.caverock.androidsvg.SVG.Style.TextDirection;
+import com.caverock.androidsvg.SVG.Style.VectorEffect;
 import org.xml.sax.Attributes;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.XMLReader;
 import org.xml.sax.ext.DefaultHandler2;
 
-import android.graphics.Matrix;
-import android.util.Log;
-
-import com.caverock.androidsvg.CSSParser.MediaType;
-import com.caverock.androidsvg.SVG.Box;
-import com.caverock.androidsvg.SVG.CSSClipRect;
-import com.caverock.androidsvg.SVG.Colour;
-import com.caverock.androidsvg.SVG.CurrentColor;
-import com.caverock.androidsvg.SVG.GradientSpread;
-import com.caverock.androidsvg.SVG.Length;
-import com.caverock.androidsvg.SVG.PaintReference;
-import com.caverock.androidsvg.SVG.Style;
-import com.caverock.androidsvg.SVG.Style.TextDecoration;
-import com.caverock.androidsvg.SVG.Style.TextDirection;
-import com.caverock.androidsvg.SVG.Style.VectorEffect;
-import com.caverock.androidsvg.SVG.SvgElementBase;
-import com.caverock.androidsvg.SVG.SvgObject;
-import com.caverock.androidsvg.SVG.SvgPaint;
-import com.caverock.androidsvg.SVG.TextChild;
-import com.caverock.androidsvg.SVG.TextPositionedContainer;
-import com.caverock.androidsvg.SVG.TextRoot;
-import com.caverock.androidsvg.SVG.Unit;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.parsers.SAXParser;
+import javax.xml.parsers.SAXParserFactory;
+import java.io.BufferedInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.*;
+import java.util.zip.GZIPInputStream;
 
 /**
  * SVG parser code. Used by SVG class. Should not be called directly.
@@ -282,6 +258,7 @@ public class SVGParser extends DefaultHandler2
       style,
       systemLanguage,
       text_anchor,
+      text_align,
       text_decoration,
       transform,
       type,
@@ -2731,6 +2708,11 @@ public class SVGParser extends DefaultHandler2
             style.specifiedFlags |= SVG.SPECIFIED_TEXT_ANCHOR;
             break;
 
+         case text_align:
+            style.textAlignment = parseTextAlignment(val);
+            style.specifiedFlags |= SVG.SPECIFIED_TEXT_ALIGNMENT;
+            break;
+
          case overflow:
             style.overflow = parseOverflow(val);
             style.specifiedFlags |= SVG.SPECIFIED_OVERFLOW;
@@ -3525,6 +3507,16 @@ public class SVGParser extends DefaultHandler2
       throw new SAXException("Invalid text-anchor property: "+val);
    }
 
+   // Parse a text align keyword
+   private static Style.TextAlignment parseTextAlignment(String val) throws SAXException {
+      if ("start".equals(val))
+         return Style.TextAlignment.Start;
+      if ("center".equals(val))
+         return Style.TextAlignment.Center;
+      if ("end".equals(val))
+         return Style.TextAlignment.End;
+      throw new SAXException("Invalid text-align property: " + val);
+   }
 
    // Parse a text anchor keyword
    private static Boolean  parseOverflow(String val) throws SAXException

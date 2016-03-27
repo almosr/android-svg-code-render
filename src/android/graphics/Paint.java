@@ -49,6 +49,11 @@ public class Paint extends AndroidClass {
         OutputBuilder.appendMethodCall(this, "setTextSize", "%ff", textSize);
     }
 
+    public void setTextAlign(Align textAlign) {
+        checkInheritance();
+        OutputBuilder.appendMethodCall(this, "setTextAlign", "Paint.Align.%s", textAlign.name());
+    }
+
     public Shader getShader() {
         return mShader;
     }
@@ -133,11 +138,11 @@ public class Paint extends AndroidClass {
         return super.getInstanceName(referringClass);
     }
 
-    public enum Style {
-        STROKE, FILL
-    }
+    public enum Style {STROKE, FILL}
 
     public enum Cap {ROUND, SQUARE, BUTT}
 
     public enum Join {ROUND, BEVEL, MITER}
+
+    public enum Align {LEFT, CENTER, RIGHT}
 }

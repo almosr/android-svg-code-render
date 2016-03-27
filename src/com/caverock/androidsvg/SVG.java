@@ -16,19 +16,6 @@
 
 package com.caverock.androidsvg;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import org.xml.sax.SAXException;
-
 import android.content.Context;
 import android.content.res.AssetManager;
 import android.content.res.Resources;
@@ -37,8 +24,13 @@ import android.graphics.Matrix;
 import android.graphics.Picture;
 import android.graphics.RectF;
 import android.util.Log;
-
 import com.caverock.androidsvg.CSSParser.Ruleset;
+import org.xml.sax.SAXException;
+
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.*;
 
 /**
  * AndroidSVG is a library for reading, parsing and rendering SVG documents on Android devices.
@@ -932,24 +924,25 @@ public class SVG
    protected static final long SPECIFIED_FONT_STYLE            = (1<<16);
    protected static final long SPECIFIED_TEXT_DECORATION       = (1<<17);
    protected static final long SPECIFIED_TEXT_ANCHOR           = (1<<18);
-   protected static final long SPECIFIED_OVERFLOW              = (1<<19);
-   protected static final long SPECIFIED_CLIP                  = (1<<20);
-   protected static final long SPECIFIED_MARKER_START          = (1<<21);
-   protected static final long SPECIFIED_MARKER_MID            = (1<<22);
-   protected static final long SPECIFIED_MARKER_END            = (1<<23);
-   protected static final long SPECIFIED_DISPLAY               = (1<<24);
-   protected static final long SPECIFIED_VISIBILITY            = (1<<25);
-   protected static final long SPECIFIED_STOP_COLOR            = (1<<26);
-   protected static final long SPECIFIED_STOP_OPACITY          = (1<<27);
-   protected static final long SPECIFIED_CLIP_PATH             = (1<<28);
-   protected static final long SPECIFIED_CLIP_RULE             = (1<<29);
-   protected static final long SPECIFIED_MASK                  = (1<<30);
-   protected static final long SPECIFIED_SOLID_COLOR           = (1L<<31);
-   protected static final long SPECIFIED_SOLID_OPACITY         = (1L<<32);
-   protected static final long SPECIFIED_VIEWPORT_FILL         = (1L<<33);
-   protected static final long SPECIFIED_VIEWPORT_FILL_OPACITY = (1L<<34);
-   protected static final long SPECIFIED_VECTOR_EFFECT         = (1L<<35);
-   protected static final long SPECIFIED_DIRECTION             = (1L<<36);
+   protected static final long SPECIFIED_TEXT_ALIGNMENT = (1 << 19);
+   protected static final long SPECIFIED_OVERFLOW = (1 << 20);
+   protected static final long SPECIFIED_CLIP = (1 << 21);
+   protected static final long SPECIFIED_MARKER_START = (1 << 22);
+   protected static final long SPECIFIED_MARKER_MID = (1 << 23);
+   protected static final long SPECIFIED_MARKER_END = (1 << 24);
+   protected static final long SPECIFIED_DISPLAY = (1 << 25);
+   protected static final long SPECIFIED_VISIBILITY = (1 << 26);
+   protected static final long SPECIFIED_STOP_COLOR = (1 << 27);
+   protected static final long SPECIFIED_STOP_OPACITY = (1 << 28);
+   protected static final long SPECIFIED_CLIP_PATH = (1 << 29);
+   protected static final long SPECIFIED_CLIP_RULE = (1 << 30);
+   protected static final long SPECIFIED_MASK = (1L << 31);
+   protected static final long SPECIFIED_SOLID_COLOR = (1L << 32);
+   protected static final long SPECIFIED_SOLID_OPACITY = (1L << 33);
+   protected static final long SPECIFIED_VIEWPORT_FILL = (1L << 34);
+   protected static final long SPECIFIED_VIEWPORT_FILL_OPACITY = (1L << 35);
+   protected static final long SPECIFIED_VECTOR_EFFECT = (1L << 36);
+   protected static final long SPECIFIED_DIRECTION = (1L << 37);
 
    protected static final long SPECIFIED_ALL = 0xffffffff;
 
@@ -986,6 +979,7 @@ public class SVG
       public Integer         fontWeight;
       public FontStyle       fontStyle;
       public TextDecoration  textDecoration;
+      public TextAlignment textAlignment;
       public TextDirection   direction;
 
       public TextAnchor   textAnchor;
@@ -1065,6 +1059,12 @@ public class SVG
          LineThrough,
          Blink
       }
+
+      public enum TextAlignment {
+         Start,
+         Center,
+         End
+      }
       
       public enum TextDirection
       {
@@ -1103,6 +1103,7 @@ public class SVG
          def.textDecoration = TextDecoration.None;
          def.direction = TextDirection.LTR;
          def.textAnchor = TextAnchor.Start;
+         def.textAlignment = TextAlignment.Start;
          def.overflow = true;  // Overflow shown/visible for root, but not for other elements (see section 14.3.3).
          def.clip = null;
          def.markerStart = null;
@@ -1565,7 +1566,7 @@ public class SVG
 
 
    // One of the element types that can cause graphics to be drawn onto the target canvas.
-   // Specifically: ‘circle’, ‘ellipse’, ‘image’, ‘line’, ‘path’, ‘polygon’, ‘polyline’, ‘rect’, ‘text’ and ‘use’.
+   // Specifically: ï¿½circleï¿½, ï¿½ellipseï¿½, ï¿½imageï¿½, ï¿½lineï¿½, ï¿½pathï¿½, ï¿½polygonï¿½, ï¿½polylineï¿½, ï¿½rectï¿½, ï¿½textï¿½ and ï¿½useï¿½.
    protected static abstract class GraphicsElement extends SvgConditionalElement implements HasTransform
    {
       public Matrix  transform;
