@@ -16,8 +16,8 @@ import java.util.zip.ZipEntry;
 public class Version {
     public static final Date BUILD_TIME = getClassBuildTime();
     private static final int MAJOR = 1;
-    private static final int MINOR = 3;
-    private static final int REVISION = 1;
+    private static final int MINOR = 4;
+    private static final int REVISION = 0;
     public static final String FULL = String.format("%d.%d.%d", MAJOR, MINOR, REVISION);
 
     /**
