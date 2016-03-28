@@ -1,6 +1,7 @@
 package android_svg_code_render;
 
 import android.graphics.Canvas;
+import android.graphics.Typeface;
 import com.caverock.androidsvg.SVG;
 import com.caverock.androidsvg.SVGParseException;
 
@@ -68,8 +69,6 @@ public class Main {
     }
 
     private static void extractParameters(String[] args) {
-        //TODO: proper parsing of the command line parameters
-
         if (args.length < 1 || args.length % 2 != 1) {
             printHelp();
             error("Wrong number of arguments");
@@ -110,6 +109,10 @@ public class Main {
                     } catch (IOException e) {
                         throw new RuntimeException("Error while reading template file", e);
                     }
+                    break;
+
+                case "-tfp":
+                    Typeface.sTypefaceParameterName = args[i + 1];
                     break;
 
                 case "-rt":
@@ -165,7 +168,7 @@ public class Main {
 
     private static void printHelp() {
         System.out.println(String.format("android-svg-code-render v%s (%s)", Version.FULL, new SimpleDateFormat("dd/MM/yyyy HH:mm").format(Version.BUILD_TIME)));
-        System.out.println("Usage: android-svg-code-render <inputfile.svg> [-p <package name>] [-c <class name>] [-o <outputfile.java>] [-t <template file>] [-rt <text replacement file>] [-rc <color replacement file>]\n");
+        System.out.println("Usage: android-svg-code-render <inputfile.svg> [-p <package name>] [-c <class name>] [-o <outputfile.java>] [-t <template file>] [-tfp <typeface parameter name>] [-rt <text replacement file>] [-rc <color replacement file>]\n");
     }
 
     private static void error(String msg, Object... params) {

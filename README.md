@@ -26,6 +26,7 @@ Arguments for the executable are:
 * **-t &lt;template file&gt;** (optional) - template Java source file which will be used for generating the output (default: built-in template)
 * **-rt &lt;text replacements file&gt;** (optional) - file name for a list of text elements in the SVG file which must be replaced by a Java variable (method parameter) in the output, list consists of lines with text element followed by variable name delimited by equals sign (default: none)
 * **-rc &lt;color replacements file&gt;** (optional) - file name for a list of color elements in the SVG file which must be replaced by a Java variable (method parameter) in the output, list consists of lines with color element (format: #AARRGGBB) followed by variable name delimited by equals sign (default: none)
+* **-tp &lt;typeface parameter name&gt;** (optional) - use specified parameter name as ```Typeface``` for text rendering instead of default typeface instances.
  
 ### Output file
 
@@ -78,6 +79,19 @@ Pass a parameter to the render method as ```int backgroundColor``` and you can s
 
 At the end of the SVG file processing any not used text and color replacements will trigger a warning log to the standard output.
 
+## About text rendering
+
+Rendering text as part of the SVG file is rather limited in the generated render method. Unfortunately, it is depending on the calculation of the width of the text object, this calculation is not simulated at the moment.
+Your text might be fine though, but certain distortions and transformations might not work properly.
+
+In case you need to change the rendered text dynamically then read the previous section about How to replace static texts.
+
+Sometimes the alignment of the text is off, or the text is rendered to a wrong position. The alignment can be corrected by using non-standard "text-align" style parameter on the text instance inside the SVG. This style is specified by certain editors in saved files, for example by Inkscape is providing the alignment style.
+
+Specified font set for texts in the SVG file will be ignored by the render method. Resolving a font set would be pretty heavy operation and would be depending on your implementation also.
+Instead, you can specify your own Android ```Typeface``` instance as a parameter to the render method and set up your font handling in any way you like.
+All you need to do is: use the -tfp command line parameter and pass a ```Typeface``` parameter name of your choice to the render method. Also set up the same parameter in your template file. The provided ```Typeface``` parameter will be used for each text rendering then, regardless what was specified in the SVG file.
+
 ## Why would this be useful to anybody?
 
 This tool might not be useful for everybody and for any random SVG rendering. Obviously, if your SVG files are not static (for example downloaded from somewhere) then you won't be able to convert them before building your app.
@@ -112,7 +126,7 @@ As it seems the generated code increases the size of the APK file more than the 
 There are some issues which needed to be addressed sooner or later:
 
 * Probably not all SVG files will be converted successfully. If you find any files which are working with the original androidsvg library (see below), but doesn't work from the converted format or you get an exception while running the tool then get in touch with me.
-* Text rendering is most likely not working properly, I haven't tried too much, but it seems to be depending on the calculation of the width of the rendered text. This part is not implemented yet, don't be surprised too much if your vector file looks funny with text in it. Also currently default font will be used (with appropriate text styles).
+* Text rendering is most likely not working properly for every text distortions, I haven't tried it too much, but the rendering seems to be depending on the calculation of the width of the rendered text. Have a look at the About text rendering section.
 * The outputted code is not optimized too deeply. Some optimization was done by eliminating useless objects, but still an awful lot of unnecessary `Paint` and `Matrix` instances are created with no good reason. The original library is a bit too hasty with cloning these instances, probably it will be possible to eliminate these later on to save some memory and increase the performance even further. (See issue #57.)
 * Embedded and external bitmaps are converted into static byte array and copied into the output source code. This method might work for small bitmaps, but large files will cause some trouble most likely. You might need to rewrite the code manually which loads the image to get it from some external file inside your app.
 

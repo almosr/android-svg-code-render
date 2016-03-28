@@ -19,10 +19,13 @@ public class Typeface extends AndroidClass {
     public static final int BOLD = 1;
     public static final int ITALIC = 2;
     public static final int BOLD_ITALIC = 3;
+
     private static final int[] STYLE_VALUES = {NORMAL, BOLD, ITALIC};
     private static final String[] STYLE_NAMES = {"NORMAL", "BOLD", "ITALIC"};
 
-    public Typeface(String instanceName) {
+    public static String sTypefaceParameterName = null;
+
+    private Typeface(String instanceName) {
         mInstanceName = instanceName;
     }
 
@@ -32,15 +35,19 @@ public class Typeface extends AndroidClass {
     }
 
     public static Typeface create(Typeface family, int typefaceStyle) {
-        Typeface newTypeface = new Typeface(generateInstanceName(Typeface.class));
+        //If there is no specified typeface parameter name then we generate our own typeface
+        if (sTypefaceParameterName == null) {
+            Typeface newTypeface = new Typeface(generateInstanceName(Typeface.class));
 
-        OutputBuilder.addImport(Typeface.class);
+            OutputBuilder.addImport(Typeface.class);
 
-        String styleFlags = OutputBuilder.splitFlags(typefaceStyle, "Typeface.", STYLE_VALUES, STYLE_NAMES);
-        OutputBuilder.appendInit(newTypeface, "%s = Typeface.create(%s, %s);", newTypeface.mInstanceName, family.getInstanceName(newTypeface), styleFlags);
+            String styleFlags = OutputBuilder.splitFlags(typefaceStyle, "Typeface.", STYLE_VALUES, STYLE_NAMES);
+            OutputBuilder.appendInit(newTypeface, "%s = Typeface.create(%s, %s);", newTypeface.mInstanceName, family.getInstanceName(newTypeface), styleFlags);
 
-        return newTypeface;
-
+            return newTypeface;
+        } else {
+            return new Typeface(sTypefaceParameterName);
+        }
     }
 
     @Override
