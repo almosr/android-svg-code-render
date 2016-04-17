@@ -86,11 +86,16 @@ public abstract class AndroidClass {
                 getInstanceName(null),
                 simpleClassName,
                 parameters != null ? String.format(parameters, objects) : "");
-        OutputBuilder.append(this, getResetMethod());
+
+        if (needsReset()) {
+            OutputBuilder.append(this, String.format("%s.reset();", getInstanceName(null)));
+        }
     }
 
-    public String getResetMethod() {
-        return String.format("%s.reset();", getInstanceName(null));
+    protected boolean needsReset() {
+        //This method can be overridden in the child class if that class does not need reset() method call
+        //after each usage. By default reset() call will be emitted.
+        return true;
     }
 
     protected void checkInheritance() {

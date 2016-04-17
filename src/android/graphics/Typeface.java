@@ -51,7 +51,7 @@ public class Typeface extends AndroidClass {
     }
 
     @Override
-    public String getResetMethod() {
-        return "";
+    protected boolean needsReset() {
+        return false;
     }
 }

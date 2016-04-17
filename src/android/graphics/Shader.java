@@ -21,4 +21,9 @@ public class Shader extends AndroidClass {
     public enum TileMode {
         MIRROR, REPEAT, CLAMP
     }
+
+    @Override
+    protected boolean needsReset() {
+        return false;
+    }
 }
