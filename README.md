@@ -26,7 +26,7 @@ Arguments for the executable are:
 * **-t &lt;template file&gt;** (optional) - template Java source file which will be used for generating the output (default: built-in template)
 * **-rt &lt;text replacements file&gt;** (optional) - file name for a list of text elements in the SVG file which must be replaced by a Java variable (method parameter) in the output, list consists of lines with text element followed by variable name delimited by equals sign (default: none)
 * **-rc &lt;color replacements file&gt;** (optional) - file name for a list of color elements in the SVG file which must be replaced by a Java variable (method parameter) in the output, list consists of lines with color element (format: #AARRGGBB) followed by variable name delimited by equals sign (default: none)
-* **-tp &lt;typeface parameter name&gt;** (optional) - use specified parameter name as ```Typeface``` for text rendering instead of default typeface instances.
+* **-tfp &lt;typeface parameter name&gt;** (optional) - use specified parameter name as ```Typeface``` for text rendering instead of default typeface instances.
  
 ### Output file
 
