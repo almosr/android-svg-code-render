@@ -8,7 +8,7 @@ import java.util.*;
  * @author Almos Rajnai
  */
 public class OutputBuilder {
-    private static final int METHOD_SIZE_THRESHOLD = 3000;
+    private static final int METHOD_SIZE_THRESHOLD = 1500;
     private static float sWidth;
     private static float sHeight;
     private static ArrayList<OutputItem> sStaticItems;
