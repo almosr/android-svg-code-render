@@ -94,7 +94,7 @@ All you need to do is: use the -tfp command line parameter and pass a ```Typefac
 
 ## Why would this be useful to anybody?
 
-This tool might not be useful for everybody and for any random SVG rendering. Obviously, if your SVG files are not static (for example downloaded from somewhere) then you won't be able to convert them before building your app.
+This tool is not useful for generic SVG rendering. Obviously, if your SVG files are not static (for example downloaded from somewhere) then you won't be able to convert them before building your app.
 
 On the other hand, if you need a flexible way of rendering complex vectors (for example a UI for a game, like in my case) and you are concerned about the speed because there are plenty of files to render then this is the solution you might be looking for.
 Before I converted all the SVG files to Java code I had to add a *"Loading"* screen to my game because it took a few seconds to render the vectors into bitmaps before I was able to use them on the screen. Now, there is no need for that screen any more, the rendering is blazingly fast. (No wonder, there is no need for interpreting a massive XML structure.)
@@ -103,12 +103,12 @@ Other benefits of using Java code over SVG file (or other vector format):
 
 * It consumes significantly less memory: no need to load the SVG file, the SVG parser eats up lots of memory, tons of useless objects were created while the image is rendered simply because the render library cannot predict the need for the various drawing classes. All of these problems are eliminated by the static rendering code.
 * You can change the rendering code manually or automatically in any way you like. It is just a Java source code after all.
-* You can add hooks into the code for passing in dynamic data (like replacing colours or text at rendering time). (Manually for now, but see issue #56.)
-* It is nearly impossible to extract the original file out of your compiled app (so, nobody will steal your precious SVG images).
-* Have I mentioned that it is FAST? You can even render the vectors in real time... zoom in/out, rotate, dynamic scaling UI, supporting any random screen resolution, this is all possible without quality loss.
-* Probably vector rendering is consuming much less memory than bitmaps (I haven't done any benchmarking, and it depends on the actual file, but it is highly possible).
+* You can add hooks into the code for passing in dynamic data (like replacing colours or text at rendering time).
+* It is nearly impossible to extract the original file from your compiled app (so, nobody will steal your precious SVG images).
+* Have I mentioned that it is FAST? You can even render the vectors in real time... Zoom in/out, rotate, scale UI dynamically, support any random screen resolution or aspect ratio: this is all possible without quality loss.
+* Potentially vector rendering is consuming much less memory than bitmaps (I haven't done any benchmarking, and it depends on the actual file, but it is highly possible).
 
-### Why not to use...
+### Why not to use it...
 
 There are downsides too... Keep them in mind!
 
@@ -120,6 +120,8 @@ There is a workaround I have figured out for this issue: you can put all the ren
 If you want to update the vector files then it is pretty much not possible without updating the app binary itself. While using SVG files you can implement a downloading process and replace the files even one-by-one whenever you want to.
 
 As it seems the generated code increases the size of the APK file more than the original SVG files. I haven't done any scientific experiments or benchmarking on this issue and it probably depends on the actual file content too, so this is just a mere warning.
+
+Since the files are converted into Java code, all files are contributing into the infamous Dex file method count ([see 64k reference limit](https://developer.android.com/studio/build/multidex.html)). Usually one SVG will be turned into a few methods only (due to the required method chaining it cannot be solved in one method only usually), so it is not a big deal, but if you had lots of files then it can make the situation worse for your code base.
 
 ## Unresolved issues
 
