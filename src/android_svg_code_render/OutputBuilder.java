@@ -41,7 +41,7 @@ public class OutputBuilder {
         str.append(String.format(" * Conversion date: %s\n", new Date().toString()));
         str.append(" *\n");
         str.append(String.format(" * Converted by android-svg-code-render v%s\n", Version.FULL));
-        str.append(" * https://github.com/racsdragon/android-svg-code-render\n");
+        str.append(" * https://github.com/almosr/android-svg-code-render\n");
         str.append(" **/\n\n");
 
         //In case it is not imported yet, although it is unlikely:
