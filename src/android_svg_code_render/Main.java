@@ -147,8 +147,16 @@ public class Main {
 
         SVG svg = SVG.getFromInputStream(is);
 
-        OutputBuilder.setWidth(svg.getDocumentWidth());
-        OutputBuilder.setHeight(svg.getDocumentHeight());
+        float width = svg.getDocumentWidth();
+        float height = svg.getDocumentHeight();
+
+        //Validate document dimensions
+        if (width <= 0.0f || height <= 0.0f) {
+            throw new RuntimeException(String.format(Locale.ENGLISH, "Illegal document dimensions: (%f:%f)\nMake sure document dimensions are set higher than 0 in input SVG file!", width, height));
+        }
+
+        OutputBuilder.setWidth(width);
+        OutputBuilder.setHeight(height);
 
         //Main canvas object is created with the static instance name from the method parameters
         Canvas canvas = new Canvas(CANVAS_PARAMETER_NAME, 1, 1, true);
