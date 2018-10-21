@@ -139,5 +139,7 @@ This project was built on the source code of the great androidsvg library from *
 You can find the project page for the original library here:
 https://github.com/BigBadaboom/androidsvg
 
+Currently integrated version is v1.3
+
 ## Code license
 android-svg-code-render is licensed under the [**Apache License v2.0**](http://www.apache.org/licenses/LICENSE-2.0).
