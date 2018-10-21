@@ -292,6 +292,7 @@ class SVGParser
       style,
       systemLanguage,
       text_anchor,
+      text_align,
       text_decoration,
       transform,
       type,
@@ -779,6 +780,11 @@ Log.d(TAG,"PROC INSTR: "+parser.getText());
       {
          // Invoke the SAX XML parser on the input.
          SAXParserFactory  spf = SAXParserFactory.newInstance();
+
+         //### Added for android_svg_code_render
+         //Java SAX implementation requires namespace aware setting to be turned on
+         spf.setNamespaceAware(true);
+         //### EOB
 
          // Disable external entity resolving
          spf.setFeature("http://xml.org/sax/features/external-general-entities", false);
@@ -3111,6 +3117,11 @@ Log.d(TAG,"PROC INSTR: "+parser.getText());
                style.specifiedFlags |= SVG.SPECIFIED_TEXT_ANCHOR;
             break;
 
+         case text_align:
+            style.textAlignment = parseTextAlignment(val);
+            style.specifiedFlags |= SVG.SPECIFIED_TEXT_ALIGNMENT;
+            break;
+
          case overflow:
             style.overflow = parseOverflow(val);
             if (style.overflow != null)
@@ -4030,6 +4041,16 @@ Log.d(TAG,"PROC INSTR: "+parser.getText());
       }
    }
 
+   // Parse a text align keyword
+   private static Style.TextAlignment parseTextAlignment(String val) {
+      if ("start".equals(val))
+         return Style.TextAlignment.Start;
+      if ("center".equals(val))
+         return Style.TextAlignment.Center;
+      if ("end".equals(val))
+         return Style.TextAlignment.End;
+      throw new RuntimeException("Invalid text-align property: " + val);
+   }
 
    // Parse a text anchor keyword
    private static Boolean  parseOverflow(String val)

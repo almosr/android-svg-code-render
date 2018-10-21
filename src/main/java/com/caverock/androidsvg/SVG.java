@@ -1092,25 +1092,26 @@ public class SVG
    static final long SPECIFIED_FONT_STYLE            = (1<<16);
    static final long SPECIFIED_TEXT_DECORATION       = (1<<17);
    static final long SPECIFIED_TEXT_ANCHOR           = (1<<18);
-   static final long SPECIFIED_OVERFLOW              = (1<<19);
-   static final long SPECIFIED_CLIP                  = (1<<20);
-   static final long SPECIFIED_MARKER_START          = (1<<21);
-   static final long SPECIFIED_MARKER_MID            = (1<<22);
-   static final long SPECIFIED_MARKER_END            = (1<<23);
-   static final long SPECIFIED_DISPLAY               = (1<<24);
-   static final long SPECIFIED_VISIBILITY            = (1<<25);
-   static final long SPECIFIED_STOP_COLOR            = (1<<26);
-   static final long SPECIFIED_STOP_OPACITY          = (1<<27);
-   static final long SPECIFIED_CLIP_PATH             = (1<<28);
-   static final long SPECIFIED_CLIP_RULE             = (1<<29);
-   static final long SPECIFIED_MASK                  = (1<<30);
-   static final long SPECIFIED_SOLID_COLOR           = (1L<<31);
-   static final long SPECIFIED_SOLID_OPACITY         = (1L<<32);
-   static final long SPECIFIED_VIEWPORT_FILL         = (1L<<33);
-   static final long SPECIFIED_VIEWPORT_FILL_OPACITY = (1L<<34);
-   static final long SPECIFIED_VECTOR_EFFECT         = (1L<<35);
-   static final long SPECIFIED_DIRECTION             = (1L<<36);
-   static final long SPECIFIED_IMAGE_RENDERING       = (1L<<37);
+   static final long SPECIFIED_TEXT_ALIGNMENT        = (1<<19);
+   static final long SPECIFIED_OVERFLOW              = (1<<20);
+   static final long SPECIFIED_CLIP                  = (1<<21);
+   static final long SPECIFIED_MARKER_START          = (1<<22);
+   static final long SPECIFIED_MARKER_MID            = (1<<23);
+   static final long SPECIFIED_MARKER_END            = (1<<24);
+   static final long SPECIFIED_DISPLAY               = (1<<25);
+   static final long SPECIFIED_VISIBILITY            = (1<<26);
+   static final long SPECIFIED_STOP_COLOR            = (1<<27);
+   static final long SPECIFIED_STOP_OPACITY          = (1<<28);
+   static final long SPECIFIED_CLIP_PATH             = (1<<29);
+   static final long SPECIFIED_CLIP_RULE             = (1<<30);
+   static final long SPECIFIED_MASK                  = (1L<<31);
+   static final long SPECIFIED_SOLID_COLOR           = (1L<<32);
+   static final long SPECIFIED_SOLID_OPACITY         = (1L<<33);
+   static final long SPECIFIED_VIEWPORT_FILL         = (1L<<34);
+   static final long SPECIFIED_VIEWPORT_FILL_OPACITY = (1L<<35);
+   static final long SPECIFIED_VECTOR_EFFECT         = (1L<<36);
+   static final long SPECIFIED_DIRECTION             = (1L<<37);
+   static final long SPECIFIED_IMAGE_RENDERING       = (1L<<38);
 
    private static final long SPECIFIED_ALL = 0xffffffff;
 
@@ -1149,6 +1150,7 @@ public class SVG
       Integer         fontWeight;
       FontStyle       fontStyle;
       TextDecoration  textDecoration;
+      TextAlignment   textAlignment;
       TextDirection   direction;
 
       TextAnchor   textAnchor;
@@ -1231,6 +1233,12 @@ public class SVG
          Blink
       }
 
+      public enum TextAlignment {
+         Start,
+         Center,
+         End
+      }
+
       public enum TextDirection
       {
          LTR,
@@ -1275,6 +1283,7 @@ public class SVG
          def.textDecoration = TextDecoration.None;
          def.direction = TextDirection.LTR;
          def.textAnchor = TextAnchor.Start;
+         def.textAlignment = TextAlignment.Start;
          def.overflow = true;  // Overflow shown/visible for root, but not for other elements (see section 14.3.3).
          def.clip = null;
          def.markerStart = null;
