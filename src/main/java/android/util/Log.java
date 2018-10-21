@@ -1,11 +1,22 @@
 package android.util;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
+
 /**
  * Created by racs on 2015.03.17..
  */
 public class Log {
     public static void e(String tag, String s) {
         printLog("E", tag, s);
+    }
+
+    public static void e(String tag, String s, Exception e) {
+        StringWriter sw = new StringWriter();
+        PrintWriter pw = new PrintWriter(sw);
+        e.printStackTrace(pw);
+        String stackTrace = sw.toString();
+        e(tag, String.format("%s\nException: %s\n%s", s, e.getClass().getName(), stackTrace));
     }
 
     public static void w(String tag, String s) {
