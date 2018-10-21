@@ -1,0 +1,42 @@
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+}
+
+plugins {
+    //Gradle plugin to generate buildconfig class
+    id 'de.fuerstenau.buildconfig' version '1.1.8'
+}
+
+group 'android_svg_code_render'
+version '1.5.0'
+
+apply plugin: 'java'
+apply plugin: 'idea'
+
+
+repositories {
+    mavenCentral()
+}
+
+allprojects {
+    sourceCompatibility = 1.8
+    targetCompatibility = 1.8
+}
+
+jar {
+    manifest {
+        attributes 'Main-Class': 'android_svg_code_render.Main'
+    }
+}
+
+idea {
+    project {
+        languageLevel = sourceCompatibility
+    }
+
+    module {
+        excludeDirs -= file("$buildDir")
+    }
+}
