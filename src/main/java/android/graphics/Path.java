@@ -10,7 +10,9 @@ import android_svg_code_render.OutputBuilder;
  */
 public class Path extends AndroidClass {
 
-    private Path.FillType mFillType;
+    public enum FillType {EVEN_ODD, WINDING}
+
+    public enum Op {INTERSECT, UNION}
 
     public Path() {
         init();
@@ -20,12 +22,7 @@ public class Path extends AndroidClass {
         OutputBuilder.appendMethodCall(this, "transform", "%s, %s", currentMatrix.getInstanceName(this), transformedPath.getInstanceName(this));
     }
 
-    public Path.FillType getFillType() {
-        return mFillType;
-    }
-
     public void setFillType(Path.FillType fillType) {
-        mFillType = fillType;
         OutputBuilder.appendMethodCall(this, "setFillType", "Path.FillType.%s", fillType.name());
     }
 
@@ -65,5 +62,7 @@ public class Path extends AndroidClass {
         OutputBuilder.appendMethodCall(this, "addPath", "%s", src.getInstanceName(this));
     }
 
-    public enum FillType {EVEN_ODD, WINDING}
+    public void op(Path path, Op op) {
+        OutputBuilder.appendMethodCall(this, "op", "%s, %s", path.getInstanceName(this), String.format("Path.Op.%s", op.name()));
+    }
 }

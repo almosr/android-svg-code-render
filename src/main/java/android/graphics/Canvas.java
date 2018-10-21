@@ -12,10 +12,10 @@ import android_svg_code_render.TextReplacements;
  * @author Almos Rajnai
  */
 public class Canvas extends AndroidClass {
-    public static final int HAS_ALPHA_LAYER_SAVE_FLAG = 4;
     public static final int MATRIX_SAVE_FLAG = 1;
-    private static final int[] FLAG_VALUES = {MATRIX_SAVE_FLAG, HAS_ALPHA_LAYER_SAVE_FLAG};
-    private static final String[] FLAG_NAMES = {"MATRIX_SAVE_FLAG", "HAS_ALPHA_LAYER_SAVE_FLAG"};
+    public static final int ALL_SAVE_FLAG = 31;
+    private static final int[] FLAG_VALUES = {MATRIX_SAVE_FLAG, ALL_SAVE_FLAG};
+    private static final String[] FLAG_NAMES = {"MATRIX_SAVE_FLAG", "ALL_SAVE_FLAG"};
 
     private static final String TAG = Canvas.class.getName();
     private final int mWidth;
@@ -142,5 +142,15 @@ public class Canvas extends AndroidClass {
     public boolean isUsed() {
         //Root canvas instance must not be removed
         return mRoot || super.isUsed();
+    }
+
+    public void saveLayer(RectF bounds, Paint paint, int saveFlags) {
+        if (bounds != null) {
+            throw new RuntimeException("Canvas.saveLayer() with non-null bounds is not supported");
+        }
+
+        OutputBuilder.appendMethodCall(this, "saveLayer", "null, %s, %s",
+                paint.getInstanceName(this),
+                OutputBuilder.splitFlags(saveFlags, "Canvas.", FLAG_VALUES, FLAG_NAMES));
     }
 }

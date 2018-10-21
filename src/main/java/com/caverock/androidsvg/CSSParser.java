@@ -16,12 +16,6 @@
 
 package com.caverock.androidsvg;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Locale;
-
-import org.xml.sax.SAXException;
-
 import android.util.Log;
 
 import com.caverock.androidsvg.SVG.SvgContainer;
@@ -29,37 +23,50 @@ import com.caverock.androidsvg.SVG.SvgElementBase;
 import com.caverock.androidsvg.SVG.SvgObject;
 import com.caverock.androidsvg.SVGParser.TextScanner;
 
-/**
- * A very simple CSS parser that is not very compliant with the CSS spec but
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+
+/*
+ * A very simple CSS parser that is not entirely compliant with the CSS spec but
  * hopefully parses almost all the CSS we are likely to strike in an SVG file.
- * The main goals are to (a) be small, and (b) parse the CSS in a Corel Draw SVG file.
- * 
- * @hide
  */
-public class CSSParser
+class CSSParser
 {
    private static final String  TAG = "AndroidSVG CSSParser";
+
+   static final String  CSS_MIME_TYPE = "text/css";
 
    private static final String  ID = "id";
    private static final String  CLASS = "class";
 
-   private MediaType  rendererMediaType = null;
+   private static final int SPECIFICITY_ID_ATTRIBUTE             = 1000000;
+   private static final int SPECIFICITY_ATTRIBUTE_OR_PSEUDOCLASS = 1000;
+   private static final int SPECIFICITY_ELEMENT_OR_PSEUDOELEMENT = 1;
+
+   private MediaType  deviceMediaType = null;
+   private Source     source = null;    // Where these rules came from (Parser or RenderOptions)
 
    private boolean  inMediaRule = false;
 
 
-   public enum MediaType
+   @SuppressWarnings("unused")
+   enum MediaType
    {
       all,
-      aural,
-      braille,
-      embossed,
-      handheld,
+      aural,       // deprecated
+      braille,     // deprecated
+      embossed,    // deprecated
+      handheld,    // deprecated
       print,
-      projection,
+      projection,  // deprecated
       screen,
-      tty,
-      tv
+      speech,
+      tty,         // deprecated
+      tv           // deprecated
    }
 
    private enum Combinator
@@ -77,13 +84,73 @@ public class CSSParser
       DASHMATCH,  // *[foo|=bar]
    }
 
-   public static class Attrib
+   // Supported SVG attributes
+   private enum  PseudoClassIdents
    {
-      public String    name = null;
-      public AttribOp  operation;
-      public String    value = null;
+      target,
+      root,
+      nth_child,
+      nth_last_child,
+      nth_of_type,
+      nth_last_of_type,
+      first_child,
+      last_child,
+      first_of_type,
+      last_of_type,
+      only_child,
+      only_of_type,
+      empty,
+      not,
+
+      // Others from  Selectors 3 (and earlier)
+      // Supported but always fail to match.
+      lang,  // might support later
+      link, visited, hover, active, focus, enabled, disabled, checked, indeterminate,
+
+      // Added in Selectors 4 spec
+      // Might support these later
+      //matches,
+      //something,  // Not final name(?)
+      //has,
+      //dir,  might support later
+      //target_within,
+      //blank,
+
+      // Opers from Selectors 4
+      // any-link, local-link, scope, focus-visible, focus-within, drop, current, past,
+      // future, playing, paused, read-only, read-write, placeholder-shown, default, valid, invalid,
+      // in-range, out-of-range, required, optional, user-invalid, nth-col, nth-last-col
+      UNSUPPORTED;
+
+      private static final Map<String, PseudoClassIdents> cache = new HashMap<>();
+
+      static {
+         for (PseudoClassIdents attr : values()) {
+            if (attr != UNSUPPORTED) {
+               final String key = attr.name().replace('_', '-');
+               cache.put(key, attr);
+            }
+         }
+      }
+
+      public static PseudoClassIdents fromString(String str)
+      {
+         PseudoClassIdents attr = cache.get(str);
+         if (attr != null) {
+            return attr;
+         }
+         return UNSUPPORTED;
+      }
+   }
+
+
+   private static class Attrib
+   {
+      final public String    name;
+      final        AttribOp  operation;
+      final public String    value;
       
-      public Attrib(String name, AttribOp op, String value)
+      Attrib(String name, AttribOp op, String value)
       {
          this.name = name;
          this.operation = op;
@@ -93,28 +160,28 @@ public class CSSParser
 
    private static class SimpleSelector
    {
-      public Combinator    combinator = null;
-      public String        tag = null;       // null means "*"
-      public List<Attrib>  attribs = null;
-      public List<String>  pseudos = null;
+      Combinator         combinator = null;
+      String             tag = null;       // null means "*"
+      List<Attrib>       attribs = null;
+      List<PseudoClass>  pseudos = null;
 
-      public SimpleSelector(Combinator combinator, String tag)
+      SimpleSelector(Combinator combinator, String tag)
       {
          this.combinator = (combinator != null) ? combinator : Combinator.DESCENDANT;
          this.tag = tag;
       }
 
-      public void  addAttrib(String attrName, AttribOp op, String attrValue)
+      void  addAttrib(String attrName, AttribOp op, String attrValue)
       {
          if (attribs == null)
-            attribs = new ArrayList<Attrib>();
+            attribs = new ArrayList<>();
          attribs.add(new Attrib(attrName, op, attrValue));
       }
 
-      public void  addPseudo(String pseudo)
+      void  addPseudo(PseudoClass pseudo)
       {
          if (pseudos == null)
-            pseudos = new ArrayList<String>();
+            pseudos = new ArrayList<>();
          pseudos.add(pseudo);
       }
 
@@ -140,22 +207,22 @@ public class CSSParser
             }
          }
          if (pseudos != null) {
-            for (String pseu: pseudos)
+            for (PseudoClass pseu: pseudos)
                sb.append(':').append(pseu);
          }
          return sb.toString();
       }
    }
 
-   public static class  Ruleset
+   static class  Ruleset
    {
       private List<Rule>  rules = null;
 
       // Add a rule to the ruleset. The position at which it is inserted is determined by its specificity value.
-      public void  add(Rule rule)
+      void  add(Rule rule)
       {
          if (this.rules == null)
-            this.rules = new ArrayList<Rule>();
+            this.rules = new ArrayList<>();
          for (int i = 0; i < rules.size(); i++)
          {
             Rule  nextRule = rules.get(i);
@@ -167,25 +234,44 @@ public class CSSParser
          rules.add(rule);
       }
 
-      public void  addAll(Ruleset rules)
+      void  addAll(Ruleset rules)
       {
          if (rules.rules == null)
             return;
          if (this.rules == null)
-            this.rules = new ArrayList<Rule>(rules.rules.size());
+            this.rules = new ArrayList<>(rules.rules.size());
          for (Rule rule: rules.rules) {
-            this.rules.add(rule);
+            this.add(rule);
          }
       }
 
-      public List<Rule>  getRules()
+      List<Rule>  getRules()
       {
          return this.rules;
       }
 
-      public boolean  isEmpty()
+      boolean  isEmpty()
       {
          return this.rules == null || this.rules.isEmpty();
+      }
+
+      int  ruleCount()
+      {
+         return (this.rules != null) ? this.rules.size() : 0;
+      }
+
+      /*
+       * Remove all rules that were addres from a give Source.
+       */
+      void  removeFromSource(Source sourceToBeRemoved)
+      {
+         if (this.rules == null)
+            return;
+         Iterator<Rule> iter = this.rules.iterator();
+         while (iter.hasNext()) {
+            if (iter.next().source == sourceToBeRemoved)
+               iter.remove();
+         }
       }
 
       @Override
@@ -201,76 +287,87 @@ public class CSSParser
    }
 
 
-   public static class  Rule
+   static enum  Source
    {
-      public Selector   selector = null;
-      public SVG.Style  style = null;
+      Document,
+      RenderOptions
+   }
+
+
+   static class  Rule
+   {
+      Selector   selector = null;
+      SVG.Style  style = null;
+      Source     source;
       
-      public Rule(Selector selector, SVG.Style style)
+      Rule(Selector selector, SVG.Style style, Source source)
       {
          this.selector = selector;
          this.style = style;
+         this.source = source;
       }
 
       @Override
       public String toString()
       {
-         StringBuilder sb = new StringBuilder();
-         return sb.append(selector).append(" {}").toString();
+         return String.valueOf(selector) + " {...} (src="+this.source+")";
       }
    }
 
 
-   public static class Selector
+   private static class Selector
    {
-      public List<SimpleSelector>  selector = null;
-      public int                   specificity = 0;
+      List<SimpleSelector>  simpleSelectors = null;
+      int                   specificity = 0;
       
-      public void  add(SimpleSelector part)
+      void  add(SimpleSelector part)
       {
-         if (this.selector == null)
-            this.selector = new ArrayList<SimpleSelector>();
-         this.selector.add(part);
+         if (this.simpleSelectors == null)
+            this.simpleSelectors = new ArrayList<>();
+         this.simpleSelectors.add(part);
       }
 
-      public int size()
+      int size()
       {
-         return (this.selector == null) ? 0 : this.selector.size();
+         return (this.simpleSelectors == null) ? 0 : this.simpleSelectors.size();
       }
 
-      public SimpleSelector get(int i)
+      SimpleSelector get(int i)
       {
-         return this.selector.get(i);
+         return this.simpleSelectors.get(i);
       }
 
-      public boolean isEmpty()
+      boolean isEmpty()
       {
-         return (this.selector == null) ? true : this.selector.isEmpty();
+         return (this.simpleSelectors == null) || this.simpleSelectors.isEmpty();
       }
 
       // Methods for accumulating a specificity value as SimpleSelector entries are added.
-      public void  addedIdAttribute()
+      // Number of ID selectors in the simpleSelectors
+      void  addedIdAttribute()
       {
-         specificity += 10000;
+         specificity += SPECIFICITY_ID_ATTRIBUTE;
       }
 
-      public void  addedAttributeOrPseudo()
+      // Number of class selectors, attributes selectors, and pseudo-classes
+      void  addedAttributeOrPseudo()
       {
-         specificity += 100;
+         specificity += SPECIFICITY_ATTRIBUTE_OR_PSEUDOCLASS;
       }
 
-      public void  addedElement()
+      // Number of type (element) selectors and pseudo-elements
+      void  addedElement()
       {
-         specificity += 1;
+         specificity += SPECIFICITY_ELEMENT_OR_PSEUDOELEMENT;
       }
 
       @Override
       public String toString()
       {
          StringBuilder  sb = new StringBuilder();
-         for (SimpleSelector sel: selector)
+         for (SimpleSelector sel: simpleSelectors)
             sb.append(sel).append(' ');
-         return sb.append('(').append(specificity).append(')').toString();
+         return sb.append('[').append(specificity).append(']').toString();
       }
    }
 
@@ -279,13 +376,26 @@ public class CSSParser
 
 
    
-   public CSSParser(MediaType rendererMediaType)
+   CSSParser()
    {
-      this.rendererMediaType = rendererMediaType;
+      this(MediaType.screen, Source.Document);
    }
 
 
-   public Ruleset  parse(String sheet) throws SAXException
+   CSSParser(Source source)
+   {
+      this(MediaType.screen, source);
+   }
+
+
+   CSSParser(MediaType rendererMediaType, Source source)
+   {
+      this.deviceMediaType = rendererMediaType;
+      this.source = source;
+   }
+
+
+   Ruleset  parse(String sheet)
    {
       CSSTextScanner  scan = new CSSTextScanner(sheet);
       scan.skipWhitespace();
@@ -294,13 +404,11 @@ public class CSSParser
    }
 
 
-   public static boolean mediaMatches(String mediaListStr, MediaType rendererMediaType) throws SAXException
+   static boolean mediaMatches(String mediaListStr, MediaType rendererMediaType)
    {
       CSSTextScanner  scan = new CSSTextScanner(mediaListStr);
       scan.skipWhitespace();
       List<MediaType>  mediaList = parseMediaList(scan);
-      if (!scan.empty())
-         throw new SAXException("Invalid @media type list");
       return mediaMatches(mediaList, rendererMediaType);
    }
 
@@ -334,7 +442,7 @@ public class CSSParser
    
    private static class CSSTextScanner extends TextScanner
    {
-      public CSSTextScanner(String input)
+      CSSTextScanner(String input)
       {
          super(input.replaceAll("(?s)/\\*.*?\\*/", ""));  // strip all block comments
       }
@@ -342,7 +450,7 @@ public class CSSParser
       /*
        * Scans for a CSS 'ident' identifier.
        */
-      public String  nextIdentifier()
+      String  nextIdentifier()
       {
          int  end = scanForIdentifier();
          if (end == position)
@@ -376,12 +484,43 @@ public class CSSParser
          return lastValidPos;
       }
 
+
       /*
-       * Scans for a CSS 'simple selector'.
+       * Parse a simpleSelectors group (eg. E, F, G). In many/most cases there will be only one entry.
+       */
+      private List<Selector>  nextSelectorGroup() throws CSSParseException
+      {
+         if (empty())
+            return null;
+
+         ArrayList<Selector>  selectorGroup = new ArrayList<>(1);
+         Selector             selector = new Selector();
+
+         while (!empty())
+         {
+            if (nextSimpleSelector(selector))
+            {
+               // If there is a comma, keep looping, otherwise break
+               if (!skipCommaWhitespace())
+                  continue;  // if not a comma, go back and check for next part of simpleSelectors
+               selectorGroup.add(selector);
+               selector = new Selector();
+            }
+            else
+               break;
+         }
+         if (!selector.isEmpty())
+            selectorGroup.add(selector);
+         return selectorGroup;
+      }
+
+
+      /*
+       * Scans for a CSS 'simple simpleSelectors'.
        * Returns true if it found one.
        * Returns false if there was an error or the input is empty.
        */
-      public boolean  nextSimpleSelector(Selector selector) throws SAXException
+      boolean  nextSimpleSelector(Selector selector) throws CSSParseException
       {
          if (empty())
             return false;
@@ -420,7 +559,7 @@ public class CSSParser
                   selectorPart = new SimpleSelector(combinator, null);
                String  value = nextIdentifier();
                if (value == null)
-                  throw new SAXException("Invalid \".class\" selector in <style> element");
+                  throw new CSSParseException("Invalid \".class\" simpleSelectors");
                selectorPart.addAttrib(CLASS, AttribOp.EQUALS, value);
                selector.addedAttributeOrPseudo();
                continue;
@@ -433,22 +572,22 @@ public class CSSParser
                   selectorPart = new SimpleSelector(combinator, null);
                String  value = nextIdentifier();
                if (value == null)
-                  throw new SAXException("Invalid \"#id\" selector in <style> element");
+                  throw new CSSParseException("Invalid \"#id\" simpleSelectors");
                selectorPart.addAttrib(ID, AttribOp.EQUALS, value);
                selector.addedIdAttribute();
+               continue;
             }
 
-            if (selectorPart == null)
-               break;
-
-            // Now check for attribute selection and pseudo selectors   
+            // Now check for attribute selection and pseudo selectors
             if (consume('['))
             {
+               if (selectorPart == null)
+                  selectorPart = new SimpleSelector(combinator, null);
                skipWhitespace();
                String  attrName = nextIdentifier();
                String  attrValue = null;
                if (attrName == null)
-                  throw new SAXException("Invalid attribute selector in <style> element");
+                  throw new CSSParseException("Invalid attribute simpleSelectors");
                skipWhitespace();
                AttribOp  op = null;
                if (consume('='))
@@ -461,11 +600,11 @@ public class CSSParser
                   skipWhitespace();
                   attrValue = nextAttribValue();
                   if (attrValue == null)
-                     throw new SAXException("Invalid attribute selector in <style> element");
+                     throw new CSSParseException("Invalid attribute simpleSelectors");
                   skipWhitespace();
                }
                if (!consume(']'))
-                  throw new SAXException("Invalid attribute selector in <style> element");
+                  throw new CSSParseException("Invalid attribute simpleSelectors");
                selectorPart.addAttrib(attrName, (op == null) ? AttribOp.EXISTS : op, attrValue);
                selector.addedAttributeOrPseudo();
                continue;
@@ -473,22 +612,10 @@ public class CSSParser
 
             if (consume(':'))
             {
-               // skip pseudo
-               int  pseudoStart = position;
-               if (nextIdentifier() != null) {
-                  if (consume('(')) {
-                     skipWhitespace();
-                     if (nextIdentifier() != null) {
-                        skipWhitespace();
-                        if (!consume(')')) {
-                           position = pseudoStart - 1;
-                           break;
-                        }
-                     }
-                  }
-                  selectorPart.addPseudo(input.substring(pseudoStart, position));
-                  selector.addedAttributeOrPseudo();
-               }
+               if (selectorPart == null)
+                  selectorPart = new SimpleSelector(combinator, null);
+               parsePseudoClass(selector, selectorPart);
+               continue;
             }
 
             break;
@@ -504,6 +631,285 @@ public class CSSParser
          position = start;
          return false;
       }
+
+
+      private static class  AnPlusB
+      {
+         public int a;
+         public int b;
+
+         AnPlusB(int a, int b) {
+            this.a = a;
+            this.b = b;
+         }
+      }
+
+
+      private AnPlusB  nextAnPlusB() throws CSSParseException
+      {
+         if (empty())
+            return null;
+
+         int  start = position;
+
+         if (!consume('('))
+           return null;
+         skipWhitespace();
+
+         AnPlusB  result;
+         if (consume("odd"))
+            result = new AnPlusB(2, 1);
+         else if (consume("even"))
+            result = new AnPlusB(2, 0);
+         else
+         {
+            // Parse an expression of the form +An+B
+            // First check for an optional leading sign
+            int  aSign = 1,
+                 bSign = 1;
+            if (consume('+')) {
+               // do nothing
+            } else if (consume('-')) {
+               bSign = -1;
+            }
+            // Then an integer
+            IntegerParser  a = null,
+                           b = IntegerParser.parseInt(input, position, inputLength, false);
+            if (b != null)
+               position = b.getEndPos();
+            // If an 'n' is next then that last part was the 'a' part. Now check for the 'b' part.
+            if (consume('n') || consume('N')) {
+               a = (b != null) ? b : new IntegerParser(1, position);
+               aSign = bSign;
+               b = null;
+               bSign = 1;
+               skipWhitespace();
+               // Check for the sign for the b part
+               boolean  hasB = consume('+');
+               if (!hasB) {
+                  hasB = consume('-');
+                  if (hasB)
+                     bSign = -1;
+               }
+               // If there was a sign, then the b integer should follow next
+               if (hasB) {
+                  skipWhitespace();
+                  b = IntegerParser.parseInt(input, position, inputLength, false);
+                  if (b != null) {
+                     position = b.getEndPos();
+                  } else {
+                     position = start;
+                     return null;
+                  }
+               }
+            }
+            // Construct the result in anticipation that we will get the end bracket next
+            result = new AnPlusB((a == null) ? 0 : aSign * a.value(),
+                                 (b == null) ? 0 : bSign * b.value());
+         }
+
+         skipWhitespace();
+         if (consume(')'))
+           return result;
+
+         position = start;
+         return null;
+      }
+
+
+      /*
+       * Parse a list of identifiers from a pseudo class parameter set.
+       * Eg. for :lang(en)
+       */
+      private List<String>  nextIdentListParam() throws CSSParseException
+      {
+         if (empty())
+            return null;
+
+         int                start = position;
+         ArrayList<String>  result = null;
+
+         if (!consume('('))
+           return null;
+         skipWhitespace();
+
+         while (true) {
+            String  ident = nextIdentifier();
+            if (ident == null) {
+               position = start;
+               return null;
+            }
+            if (result == null)
+               result = new ArrayList<>();
+            result.add(ident);
+            skipWhitespace();
+            if (!skipCommaWhitespace())
+               break;
+         }
+
+         if (consume(')'))
+           return result;
+
+         position = start;
+         return null;
+      }
+
+
+      /*
+       * Parse a simpleSelectors group inside a pair of brackets.  For the :not pseudo class.
+       */
+      private List<Selector>  nextPseudoNotParam() throws CSSParseException
+      {
+         if (empty())
+            return null;
+
+         int  start = position;
+
+         if (!consume('('))
+           return null;
+         skipWhitespace();
+
+         // Parse the parameter contents
+         List<Selector>  result = nextSelectorGroup();
+
+         if (result == null) {
+            position = start;
+            return null;
+         }
+
+         if (!consume(')')) {
+            position = start;
+            return null;
+         }
+
+         // Nesting a :not() pseudo class within a :not() is not allowed.
+         for (Selector selector: result) {
+            if (selector.simpleSelectors == null)
+               break;
+            for (SimpleSelector simpleSelector: selector.simpleSelectors) {
+               if (simpleSelector.pseudos == null)
+                  break;
+               for (PseudoClass pseudo: simpleSelector.pseudos) {
+                  if (pseudo instanceof PseudoClassNot)
+                     return null;
+               }
+            }
+         }
+
+         return result;
+      }
+
+
+      /*
+       * Parse a pseudo class (such as ":first-child")
+       */
+      private void  parsePseudoClass(Selector selector, SimpleSelector selectorPart) throws CSSParseException
+      {
+         // skip pseudo
+//         int     pseudoStart = position;
+         String  ident = nextIdentifier();
+         if (ident == null)
+            throw new CSSParseException("Invalid pseudo class");
+
+         PseudoClass        pseudo = null;
+         PseudoClassIdents  identEnum = PseudoClassIdents.fromString(ident);
+         switch (identEnum)
+         {
+            case first_child:
+               pseudo = new PseudoClassAnPlusB(0, 1, true, false, null);
+               selector.addedAttributeOrPseudo();
+               break;
+
+            case last_child:
+               pseudo = new PseudoClassAnPlusB(0, 1, false, false, null);
+               selector.addedAttributeOrPseudo();
+               break;
+
+            case only_child:
+               pseudo = new PseudoClassOnlyChild(false, null);
+               selector.addedAttributeOrPseudo();
+               break;
+
+            case first_of_type:
+               pseudo = new PseudoClassAnPlusB(0, 1, true, true, selectorPart.tag);
+               selector.addedAttributeOrPseudo();
+               break;
+
+            case last_of_type:
+               pseudo = new PseudoClassAnPlusB(0, 1, false, true, selectorPart.tag);
+               selector.addedAttributeOrPseudo();
+               break;
+
+            case only_of_type:
+               pseudo = new PseudoClassOnlyChild(true, selectorPart.tag);
+               selector.addedAttributeOrPseudo();
+               break;
+
+            case root:
+               pseudo = new PseudoClassRoot();
+               selector.addedAttributeOrPseudo();
+               break;
+
+            case empty:
+               pseudo = new PseudoClassEmpty();
+               selector.addedAttributeOrPseudo();
+               break;
+
+            case nth_child:
+            case nth_last_child:
+            case nth_of_type:
+            case nth_last_of_type:
+               boolean fromStart = identEnum == PseudoClassIdents.nth_child || identEnum == PseudoClassIdents.nth_of_type;
+               boolean ofType    = identEnum == PseudoClassIdents.nth_of_type || identEnum == PseudoClassIdents.nth_last_of_type;
+               AnPlusB  ab = nextAnPlusB();
+               if (ab == null)
+                  throw new CSSParseException("Invalid or missing parameter section for pseudo class: " + ident);
+               pseudo = new PseudoClassAnPlusB(ab.a, ab.b, fromStart, ofType, selectorPart.tag);
+               selector.addedAttributeOrPseudo();
+               break;
+
+            case not:
+               List<Selector>  notSelectorGroup = nextPseudoNotParam();
+               if (notSelectorGroup == null)
+                  throw new CSSParseException("Invalid or missing parameter section for pseudo class: " + ident);
+               pseudo = new PseudoClassNot(notSelectorGroup);
+               selector.specificity = ((PseudoClassNot) pseudo).getSpecificity();
+               break;
+
+            case target:
+               //TODO
+               pseudo = new PseudoClassTarget();
+               selector.addedAttributeOrPseudo();
+               break;
+
+            case lang:
+               List<String>  langs = nextIdentListParam();
+               pseudo = new PseudoClassNotSupported(ident);
+               selector.addedAttributeOrPseudo();
+               break;
+
+            case link:
+            case visited:
+            case hover:
+            case active:
+            case focus:
+            case enabled:
+            case disabled:
+            case checked:
+            case indeterminate:
+               pseudo = new PseudoClassNotSupported(ident);
+               selector.addedAttributeOrPseudo();
+               break;
+
+            default:
+               throw new CSSParseException("Unsupported pseudo class: " + ident);
+         }
+
+//         selectorPart.addPseudo(input.substring(pseudoStart, position));
+         selectorPart.addPseudo(pseudo);
+//         simpleSelectors.addedAttributeOrPseudo();
+      }
+
 
       /*
        * The value (bar) part of "[foo="bar"]".
@@ -522,7 +928,7 @@ public class CSSParser
       /*
        * Scans for a CSS property value.
        */
-      public String  nextPropertyValue()
+      String  nextPropertyValue()
       {
          if (empty())
             return null;
@@ -541,13 +947,156 @@ public class CSSParser
          return null;
       }
 
+      /*
+       * Scans for a string token
+       */
+      String  nextCSSString()
+      {
+         if (empty())
+            return null;
+         int  ch = input.charAt(position);
+         int  endQuote = ch;
+         if (ch != '\'' && ch != '"')
+            return null;
+
+         StringBuilder  sb = new StringBuilder();
+         position++;
+         ch = nextChar();
+         while (ch != -1 && ch != endQuote)
+         {
+            if (ch == '\\') {
+              // Escaped char sequence
+               ch = nextChar();
+               if (ch == -1)    // EOF: do nothing
+                  continue;
+               if (ch == '\n' || ch == '\r' || ch == '\f') {  // a CSS newline
+                  ch = nextChar();
+                  continue;     // Newline: consume it
+               }
+               int  hc = hexChar(ch);
+               if (hc != -1) {
+                  int  codepoint = hc;
+                  for (int i=1; i<=5; i++) {
+                     ch = nextChar();
+                     hc = hexChar(ch);
+                     if (hc == -1)
+                        break;
+                     codepoint = codepoint * 16 + hc;
+                  }
+                  sb.append((char) codepoint);
+                  continue;
+               }
+               // Other chars just unescape to themselves
+               // Fall through to append
+            }
+            sb.append((char) ch);
+            ch = nextChar();
+         }
+         return sb.toString();
+      }
+
+
+      private int  hexChar(int ch)
+      {
+         if (ch >= '0' && ch <= '9')
+            return ((int)ch - (int)'0');
+         if (ch >= 'A' && ch <= 'F')
+            return ((int)ch - (int)'A') + 10;
+         if (ch >= 'a' && ch <= 'f')
+            return ((int)ch - (int)'a') + 10;
+         return -1;
+      }
+
+
+      /*
+       * Scans for a url("...")
+       * Called a <url> in the CSS spec.
+       */
+      String  nextURL()
+      {
+         if (empty())
+            return null;
+         int  start = position;
+         if (!consume("url("))
+            return null;
+
+         skipWhitespace();
+
+         String url = nextCSSString();
+         if (url == null)
+            url = nextLegacyURL();  // legacy quote-less url(...).  Called a <url-token> in the CSS3 spec.
+
+         if (url == null) {
+            position = start;
+            return null;
+         }
+
+         skipWhitespace();
+
+         if (empty() || consume(")"))
+            return url;
+
+         position = start;
+         return null;
+      }
+
+
+      /*
+       * Scans for a legacy URL string
+       * See nextURLToken().
+       */
+      String  nextLegacyURL()
+      {
+         StringBuilder  sb = new StringBuilder();
+
+         while (!empty())
+         {
+            int  ch = input.charAt(position);
+
+            if (ch == '\'' || ch == '"' || ch == '(' || ch == ')' || isWhitespace(ch) || Character.isISOControl(ch))
+               break;
+
+            position++;
+            if (ch == '\\')
+            {
+               if (empty())    // EOF: do nothing
+                  continue;
+               // Escaped char sequence
+               ch = input.charAt(position++);
+               if (ch == '\n' || ch == '\r' || ch == '\f') {  // a CSS newline
+                  continue;     // Newline: consume it
+               }
+               int  hc = hexChar(ch);
+               if (hc != -1) {
+                  int  codepoint = hc;
+                  for (int i=1; i<=5; i++) {
+                     if (empty())
+                        break;
+                     hc = hexChar( input.charAt(position) );
+                     if (hc == -1)  // Not a hex char
+                        break;
+                     position++;
+                     codepoint = codepoint * 16 + hc;
+                  }
+                  sb.append((char) codepoint);
+                  continue;
+               }
+               // Other chars just unescape to themselves
+               // Fall through to append
+            }
+            sb.append((char) ch);
+         }
+         if (sb.length() == 0)
+            return null;
+         return sb.toString();
+      }
    }
 
 
    //==============================================================================
 
 
-   // Returns true if 'rendererMediaType' matches one of the media types in 'mediaList'
+   // Returns true if 'deviceMediaType' matches one of the media types in 'mediaList'
    private static boolean mediaMatches(List<MediaType> mediaList, MediaType rendererMediaType)
    {
       for (MediaType type: mediaList) {
@@ -558,15 +1107,17 @@ public class CSSParser
    }
 
 
-   private static List<MediaType> parseMediaList(CSSTextScanner scan) throws SAXException
+   private static List<MediaType> parseMediaList(CSSTextScanner scan)
    {
-      ArrayList<MediaType>  typeList = new ArrayList<MediaType>();
+      ArrayList<MediaType>  typeList = new ArrayList<>();
       while (!scan.empty()) {
-         String  type = scan.nextToken(',');
+         String  type = scan.nextWord();
+         if (type == null)
+            break;
          try {
             typeList.add(MediaType.valueOf(type));
          } catch (IllegalArgumentException e) {
-            throw new SAXException("Invalid @media type list");
+            // Ignore invalid media types
          }
          // If there is a comma, keep looping, otherwise break
          if (!scan.skipCommaWhitespace())
@@ -576,20 +1127,20 @@ public class CSSParser
    }
 
 
-   private void  parseAtRule(Ruleset ruleset, CSSTextScanner scan) throws SAXException
+   private void  parseAtRule(Ruleset ruleset, CSSTextScanner scan) throws CSSParseException
    {
       String  atKeyword = scan.nextIdentifier();
       scan.skipWhitespace();
       if (atKeyword == null)
-         throw new SAXException("Invalid '@' rule in <style> element");
+         throw new CSSParseException("Invalid '@' rule");
       if (!inMediaRule && atKeyword.equals("media"))
       {
          List<MediaType>  mediaList = parseMediaList(scan);
          if (!scan.consume('{'))
-            throw new SAXException("Invalid @media rule: missing rule set");
+            throw new CSSParseException("Invalid @media rule: missing rule set");
             
          scan.skipWhitespace();
-         if (mediaMatches(mediaList, rendererMediaType)) {
+         if (mediaMatches(mediaList, deviceMediaType)) {
             inMediaRule = true;
             ruleset.addAll( parseRuleset(scan) );
             inMediaRule = false;
@@ -597,12 +1148,32 @@ public class CSSParser
             parseRuleset(scan);  // parse and ignore accompanying ruleset
          }
 
-         if (!scan.consume('}'))
-            throw new SAXException("Invalid @media rule: expected '}' at end of rule set");
+         if (!scan.empty() && !scan.consume('}'))
+            throw new CSSParseException("Invalid @media rule: expected '}' at end of rule set");
 
-      //} else if (atKeyword.equals("charset")) {
-      //} else if (atKeyword.equals("import")) {
       }
+      else if (!inMediaRule && atKeyword.equals("import"))
+      {
+         String  file = scan.nextURL();
+         if (file == null)
+            file = scan.nextCSSString();
+         if (file == null)
+            throw new CSSParseException("Invalid @import rule: expected string or url()");
+
+         scan.skipWhitespace();
+         List<MediaType>  mediaList = parseMediaList(scan);
+
+         if (!scan.empty() && !scan.consume(';'))
+            throw new CSSParseException("Invalid @media rule: expected '}' at end of rule set");
+
+         if (SVG.getFileResolver() != null && mediaMatches(mediaList, deviceMediaType)) {
+            String  css = SVG.getFileResolver().resolveCSSStyleSheet(file);
+            if (css == null)
+               return;
+            ruleset.addAll( parse(css) );
+         }
+      }
+      //} else if (atKeyword.equals("charset")) {
       else
       {
          // Unknown/unsupported at-rule
@@ -632,42 +1203,51 @@ public class CSSParser
    }
 
 
-   private Ruleset  parseRuleset(CSSTextScanner scan) throws SAXException
+   private Ruleset  parseRuleset(CSSTextScanner scan)
    {
       Ruleset  ruleset = new Ruleset(); 
-      while (!scan.empty())
+      try
       {
-         if (scan.consume("<!--"))
-            continue;
-         if (scan.consume("-->"))
-            continue;
+         while (!scan.empty())
+         {
+            if (scan.consume("<!--"))
+               continue;
+            if (scan.consume("-->"))
+               continue;
 
-         if (scan.consume('@')) {
-            parseAtRule(ruleset, scan);
-            continue;
+            if (scan.consume('@')) {
+               parseAtRule(ruleset, scan);
+               continue;
+            }
+            if (parseRule(ruleset, scan))
+               continue;
+
+            // Nothing recognisable found. Could be end of rule set. Return.
+            break;
          }
-         if (parseRule(ruleset, scan))
-            continue;
-
-         // Nothing recognisable found. Could be end of rule set. Return.
-         break;
+      }
+      catch (CSSParseException e)
+      {
+         Log.e(TAG, "CSS parser terminated early due to error: " + e.getMessage());
+         if (LibConfig.DEBUG)
+            Log.e(TAG,"Stacktrace:", e);
       }
       return ruleset;
    }
 
 
-   private boolean  parseRule(Ruleset ruleset, CSSTextScanner scan) throws SAXException
+   private boolean  parseRule(Ruleset ruleset, CSSTextScanner scan) throws CSSParseException
    {
-      List<Selector>  selectors = parseSelectorGroup(scan);
+      List<Selector>  selectors = scan.nextSelectorGroup();
       if (selectors != null && !selectors.isEmpty())
       {
          if (!scan.consume('{'))
-            throw new SAXException("Malformed rule block in <style> element: missing '{'");
+            throw new CSSParseException("Malformed rule block: expected '{'");
          scan.skipWhitespace();
          SVG.Style  ruleStyle = parseDeclarations(scan);
          scan.skipWhitespace();
          for (Selector selector: selectors) {
-            ruleset.add( new Rule(selector, ruleStyle) );
+            ruleset.add( new Rule(selector, ruleStyle, source) );
          }
          return true;
       }
@@ -678,38 +1258,8 @@ public class CSSParser
    }
 
 
-   /*
-    * Parse a selector group (eg. E, F, G). In many/most cases there will be only one entry.
-    */
-   private List<Selector>  parseSelectorGroup(CSSTextScanner scan) throws SAXException
-   {
-      if (scan.empty())
-         return null;
-
-      ArrayList<Selector>  selectorGroup = new ArrayList<Selector>(1);
-      Selector             selector = new Selector();
-
-      while (!scan.empty())
-      {
-         if (scan.nextSimpleSelector(selector))
-         {
-            // If there is a comma, keep looping, otherwise break
-            if (!scan.skipCommaWhitespace())
-               continue;  // if not a comma, go back and check for next part of selector
-            selectorGroup.add(selector);
-            selector = new Selector();
-         }
-         else
-            break;
-      }
-      if (!selector.isEmpty())
-         selectorGroup.add(selector);
-      return selectorGroup;
-   }
-
-
-   // Parse a list of
-   private SVG.Style  parseDeclarations(CSSTextScanner scan) throws SAXException
+   // Parse a list of CSS declarations
+   private SVG.Style  parseDeclarations(CSSTextScanner scan) throws CSSParseException
    {
       SVG.Style  ruleStyle = new SVG.Style();
       while (true)
@@ -717,48 +1267,48 @@ public class CSSParser
          String  propertyName = scan.nextIdentifier();
          scan.skipWhitespace();
          if (!scan.consume(':'))
-            break;  // Syntax error. Stop processing CSS rules.
+            throw new CSSParseException("Expected ':'");
          scan.skipWhitespace();
          String  propertyValue = scan.nextPropertyValue();
          if (propertyValue == null)
-            break;  // Syntax error
+            throw new CSSParseException("Expected property value");
          // Check for !important flag.
          scan.skipWhitespace();
          if (scan.consume('!')) {
             scan.skipWhitespace();
             if (!scan.consume("important")) {
-               throw new SAXException("Malformed rule set in <style> element: found unexpected '!'");
+               throw new CSSParseException("Malformed rule set: found unexpected '!'");
             }
-            // We don't do anything with these. We just ignore them.
+            // We don't do anything with these. We just ignore them. TODO
             scan.skipWhitespace();
          }
          scan.consume(';');
+         // TODO: support CSS only values such as "inherit"
          SVGParser.processStyleProperty(ruleStyle, propertyName, propertyValue);
          scan.skipWhitespace();
-         if (scan.consume('}'))
-            return ruleStyle;
-         if (scan.empty())
+         if (scan.empty() || scan.consume('}'))
             break;
       }
-      throw new SAXException("Malformed rule set in <style> element");
+      return ruleStyle;
    }
 
 
    /*
     * Used by SVGParser to parse the "class" attribute.
+    * Follows ordered set parser algorithm: https://dom.spec.whatwg.org/#concept-ordered-set-parser
     */
-   protected static List<String>  parseClassAttribute(String val) throws SAXException
+   public static List<String>  parseClassAttribute(String val)
    {
       CSSTextScanner  scan = new CSSTextScanner(val);
       List<String>    classNameList = null;
 
       while (!scan.empty())
       {
-         String  className = scan.nextIdentifier();
+         String  className = scan.nextToken();
          if (className == null)
-            throw new SAXException("Invalid value for \"class\" attribute: "+val);
+            continue;
          if (classNameList == null)
-            classNameList = new ArrayList<String>();
+            classNameList = new ArrayList<>();
          classNameList.add(className);
          scan.skipWhitespace();
       }
@@ -766,13 +1316,32 @@ public class CSSParser
    }
 
 
+   //==============================================================================
+   // Matching a selector against an object/element
+
+
+   static class RuleMatchContext
+   {
+      SvgElementBase  targetElement;    // From RenderOptions.target() and used for the :target selector
+
+      @Override
+      public String toString()
+      {
+         if (targetElement != null)
+            return String.format("<%s id=\"%s\">", targetElement.getNodeName(), targetElement.id);
+         else
+            return "";
+      }
+   }
+
+
    /*
     * Used by renderer to check if a CSS rule matches the current element.
     */
-   protected static boolean  ruleMatch(Selector selector, SvgElementBase obj)
+   static boolean  ruleMatch(RuleMatchContext ruleMatchContext, Selector selector, SvgElementBase obj)
    {
       // Build the list of ancestor objects
-      List<SvgContainer> ancestors = new ArrayList<SvgContainer>();
+      List<SvgContainer> ancestors = new ArrayList<>();
       SvgContainer  parent = obj.parent;
       while (parent != null) {
          ancestors.add(0, parent);
@@ -783,20 +1352,20 @@ public class CSSParser
 
       // Check the most common case first as a shortcut.
       if (selector.size() == 1)
-         return selectorMatch(selector.get(0), ancestors, ancestorsPos, obj);
+         return selectorMatch(ruleMatchContext, selector.get(0), ancestors, ancestorsPos, obj);
       
-      // We start at the last part of the selector and loop back through the parts
-      // Get the next selector part
-      return ruleMatch(selector, selector.size() - 1, ancestors, ancestorsPos, obj);
+      // We start at the last part of the simpleSelectors and loop back through the parts
+      // Get the next simpleSelectors part
+      return ruleMatch(ruleMatchContext, selector, selector.size() - 1, ancestors, ancestorsPos, obj);
    }
 
 
-   private static boolean  ruleMatch(Selector selector, int selPartPos, List<SvgContainer> ancestors, int ancestorsPos, SvgElementBase obj)
+   private static boolean  ruleMatch(RuleMatchContext ruleMatchContext, Selector selector, int selPartPos, List<SvgContainer> ancestors, int ancestorsPos, SvgElementBase obj)
    {
-      // We start at the last part of the selector and loop back through the parts
-      // Get the next selector part
+      // We start at the last part of the simpleSelectors and loop back through the parts
+      // Get the next simpleSelectors part
       SimpleSelector  sel = selector.get(selPartPos);
-      if (!selectorMatch(sel, ancestors, ancestorsPos, obj))
+      if (!selectorMatch(ruleMatchContext, sel, ancestors, ancestorsPos, obj))
          return false;
 
       // Selector part matched, check its combinator
@@ -804,9 +1373,9 @@ public class CSSParser
       {
          if (selPartPos == 0)
             return true;
-         // Search up the ancestors list for a node that matches the next selector
+         // Search up the ancestors list for a node that matches the next simpleSelectors
          while (ancestorsPos >= 0) {
-            if (ruleMatchOnAncestors(selector, selPartPos - 1, ancestors, ancestorsPos))
+            if (ruleMatchOnAncestors(ruleMatchContext, selector, selPartPos - 1, ancestors, ancestorsPos))
                return true;
             ancestorsPos--;
          }
@@ -814,7 +1383,7 @@ public class CSSParser
       }
       else if (sel.combinator == Combinator.CHILD)
       {
-         return ruleMatchOnAncestors(selector, selPartPos - 1, ancestors, ancestorsPos);
+         return ruleMatchOnAncestors(ruleMatchContext, selector, selPartPos - 1, ancestors, ancestorsPos);
       }
       else //if (sel.combinator == Combinator.FOLLOWS)
       {
@@ -822,17 +1391,17 @@ public class CSSParser
          if (childPos <= 0)
             return false;
          SvgElementBase  prevSibling = (SvgElementBase) obj.parent.getChildren().get(childPos - 1);
-         return ruleMatch(selector, selPartPos - 1, ancestors, ancestorsPos, prevSibling);
+         return ruleMatch(ruleMatchContext, selector, selPartPos - 1, ancestors, ancestorsPos, prevSibling);
       }
    }
 
 
-   private static boolean  ruleMatchOnAncestors(Selector selector, int selPartPos, List<SvgContainer> ancestors, int ancestorsPos)
+   private static boolean  ruleMatchOnAncestors(RuleMatchContext ruleMatchContext, Selector selector, int selPartPos, List<SvgContainer> ancestors, int ancestorsPos)
    {
       SimpleSelector  sel = selector.get(selPartPos);
       SvgElementBase  obj = (SvgElementBase) ancestors.get(ancestorsPos);
 
-      if (!selectorMatch(sel, ancestors, ancestorsPos, obj))
+      if (!selectorMatch(ruleMatchContext, sel, ancestors, ancestorsPos, obj))
          return false;
 
       // Selector part matched, check its combinator
@@ -840,16 +1409,16 @@ public class CSSParser
       {
          if (selPartPos == 0)
             return true;
-         // Search up the ancestors list for a node that matches the next selector
+         // Search up the ancestors list for a node that matches the next simpleSelectors
          while (ancestorsPos > 0) {
-            if (ruleMatchOnAncestors(selector, selPartPos - 1, ancestors, --ancestorsPos))
+            if (ruleMatchOnAncestors(ruleMatchContext, selector, selPartPos - 1, ancestors, --ancestorsPos))
                return true;
          }
          return false;
       }
       else if (sel.combinator == Combinator.CHILD)
       {
-         return ruleMatchOnAncestors(selector, selPartPos - 1, ancestors, ancestorsPos - 1);
+         return ruleMatchOnAncestors(ruleMatchContext, selector, selPartPos - 1, ancestors, ancestorsPos - 1);
       }
       else //if (sel.combinator == Combinator.FOLLOWS)
       {
@@ -857,15 +1426,15 @@ public class CSSParser
          if (childPos <= 0)
             return false;
          SvgElementBase  prevSibling = (SvgElementBase) obj.parent.getChildren().get(childPos - 1);
-         return ruleMatch(selector, selPartPos - 1, ancestors, ancestorsPos, prevSibling);
+         return ruleMatch(ruleMatchContext, selector, selPartPos - 1, ancestors, ancestorsPos, prevSibling);
       }
    }
 
 
    private static int getChildPosition(List<SvgContainer> ancestors, int ancestorsPos, SvgElementBase obj)
    {
-      if (ancestorsPos < 0)  // Has no parent, so can't have a sibling
-         return -1;
+      if (ancestorsPos < 0)  // Has no parent, so must be only child of document
+         return 0;
       if (ancestors.get(ancestorsPos) != obj.parent)  // parent doesn't match, so obj must be an indirect reference (eg. from a <use>)
          return -1;
       int  childPos = 0;
@@ -879,22 +1448,12 @@ public class CSSParser
    }
 
 
-   private static boolean selectorMatch(SimpleSelector sel, List<SvgContainer> ancestors, int ancestorsPos, SvgElementBase obj)
+   private static boolean selectorMatch(RuleMatchContext ruleMatchContext, SimpleSelector sel, List<SvgContainer> ancestors, int ancestorsPos, SvgElementBase obj)
    {
       // Check tag name. tag==null means tag is "*" which matches everything.
-      if (sel.tag != null) {
-         // The Group object does not match its tag ("<g>"), so we have to handle it as a special case.
-         if (sel.tag.equalsIgnoreCase("G"))
-         {
-            if (!(obj instanceof SVG.Group))
-               return false;
-         }
-         // all other element classes should match their tag names
-         else if (!sel.tag.equals(obj.getClass().getSimpleName().toLowerCase(Locale.US)))
-         {
-            return false;
-         }
-      }
+      if (sel.tag != null && !sel.tag.equals(obj.getNodeName().toLowerCase(Locale.US)))
+         return false;
+
       // If here, then tag part matched
 
       // Check the attributes
@@ -902,40 +1461,285 @@ public class CSSParser
       {
          for (Attrib attr: sel.attribs)
          {
-            if (attr.name == ID)
-            {
-               if (!attr.value.equals(obj.id))
+            switch (attr.name) {
+               case ID:
+                  if (!attr.value.equals(obj.id))
+                     return false;
+                  break;
+               case CLASS:
+                  if (obj.classNames == null)
+                     return false;
+                  if (!obj.classNames.contains(attr.value))
+                     return false;
+                  break;
+               default:
+                  // Other attribute simpleSelectors not yet supported
                   return false;
-            }
-            else if (attr.name == CLASS)
-            {
-               if (obj.classNames == null)
-                  return false;
-               if (!obj.classNames.contains(attr.value))
-                  return false;
-            }
-            else
-            {
-               // Other attribute selector not yet supported
-               return false;
             }
          }
       }
 
       // Check the pseudo classes
       if (sel.pseudos != null) {
-         for (String pseudo: sel.pseudos) {
-            if (pseudo.equals("first-child")) {
-               if (getChildPosition(ancestors, ancestorsPos, obj) != 0)
-                  return false;
-            } else {
+         for (PseudoClass pseudo: sel.pseudos) {
+            if (!pseudo.matches(ruleMatchContext, obj))
                return false;
-            }
          }
       }
 
-      // If w reached this point, the selector matched
+      // If w reached this point, the simpleSelectors matched
       return true;
+   }
+
+
+   //==============================================================================
+
+
+   private static interface  PseudoClass
+   {
+      public boolean  matches(RuleMatchContext ruleMatchContext, SvgElementBase obj);
+   }
+
+
+   private static class  PseudoClassAnPlusB  implements PseudoClass
+   {
+      private int      a;
+      private int      b;
+      private boolean  isFromStart;
+      private boolean  isOfType;
+      private String   nodeName;  // The node name for when isOfType is true
+
+
+      PseudoClassAnPlusB(int a, int b, boolean isFromStart, boolean isOfType, String nodeName)
+      {
+         this.a = a;
+         this.b = b;
+         this.isFromStart = isFromStart;
+         this.isOfType = isOfType;
+         this.nodeName = nodeName;
+      }
+
+      @Override
+      public boolean matches(RuleMatchContext ruleMatchContext, SvgElementBase obj)
+      {
+         // If this is a "*-of-type" pseudoclass, and the node name hasn't beens specified,
+         // then match true if the element being tested is first of its type
+         String  nodeNameToCheck = (isOfType && nodeName == null) ? obj.getNodeName() : nodeName;
+
+         // Initialise with correct values for root element
+         int childPos = 0;
+         int childCount = 1;
+
+         // If this is not the root element, then determine
+         // this objects sibling position and total sibling count
+         if (obj.parent != null) {
+            childCount = 0;
+            for (SvgObject node: obj.parent.getChildren()) {
+               SvgElementBase  child = (SvgElementBase) node;  // This should be safe. We shouldn't be styling any SvgObject that isn't an element.
+               if (child == obj)
+                  childPos = childCount;
+               if (nodeNameToCheck == null || child.getNodeName().equals(nodeNameToCheck))
+                  childCount++;   // this is a child of the right type
+            }
+         }
+
+         childPos = isFromStart ? childPos + 1            // nth-child positions start at 1, not 0
+                                : childCount - childPos;  // for nth-last-child() type pseudo classes
+
+         // Check if an + b == childPos.  The test is true for any n >= 0.
+         // So rearranging fo n we get: n = (childPos - b) / a
+         if (a == 0) {
+            // a is zero for pseudo classes like: nth-child(b)
+            // So we match if childPos == b
+            return childPos == b;
+         }
+         // Otherwise we match if ((childPos - b) / a) is an integer (modulus is 0) and is >= 0
+         return ((childPos - b) % a) == 0 &&
+                //((childPos - b) / a) >= 0;
+                (Integer.signum(childPos - b) == 0 || Integer.signum(childPos - b) == Integer.signum(a));  // Faster equivalent of ((childPos - b) / a) >= 0;
+      }
+
+      @Override
+      public String toString()
+      {
+         String last = isFromStart ? "" : "last-";
+         return isOfType ? String.format("nth-%schild(%dn%+d of type <%s>)", last, a, b, nodeName)
+                         : String.format("nth-%schild(%dn%+d)", last, a, b);
+      }
+
+   }
+
+
+   private static class  PseudoClassOnlyChild  implements PseudoClass
+   {
+      private boolean  isOfType;
+      private String   nodeName;  // The node name for when isOfType is true
+
+
+      public PseudoClassOnlyChild(boolean isOfType, String nodeName)
+      {
+         this.isOfType = isOfType;
+         this.nodeName = nodeName;
+      }
+
+      @Override
+      public boolean matches(RuleMatchContext ruleMatchContext, SvgElementBase obj)
+      {
+         // If this is a "*-of-type" pseudoclass, and the node name hasn't beens specified,
+         // then match true if the element being tested is first of its type
+         String  nodeNameToCheck = (isOfType && nodeName == null) ? obj.getNodeName() : nodeName;
+
+         // Initialise with correct values for root element
+         int childCount = 1;
+
+         // If this is not the root element, then determine
+         // this objects sibling position and total sibling count
+         if (obj.parent != null) {
+            childCount = 0;
+            for (SvgObject node: obj.parent.getChildren()) {
+               SvgElementBase  child = (SvgElementBase) node;  // This should be safe. We shouldn't be styling any SvgObject that isn't an element.
+               if (nodeNameToCheck == null || child.getNodeName().equals(nodeNameToCheck))
+                  childCount++;   // this is a child of the right type
+            }
+         }
+
+         return (childCount == 1);
+      }
+
+      @Override
+      public String toString()
+      {
+         return isOfType ? String.format("only-of-type <%s>", nodeName)
+                         : String.format("only-child");
+      }
+
+   }
+
+
+   private static class  PseudoClassRoot  implements PseudoClass
+   {
+      @Override
+      public boolean matches(RuleMatchContext ruleMatchContext, SvgElementBase obj)
+      {
+         return obj.parent == null;
+      }
+
+      @Override
+      public String toString()
+      {
+         return "root";
+      }
+
+   }
+
+
+   private static class  PseudoClassEmpty  implements PseudoClass
+   {
+      @Override
+      public boolean matches(RuleMatchContext ruleMatchContext, SvgElementBase obj)
+      {
+         //return (obj.getChildren().length == 0;
+
+         // temp implementation
+         if (obj instanceof SvgContainer)
+           return ((SvgContainer)obj).getChildren().size() == 0;
+         else
+           return true;
+         // FIXME  all SVG graphics elements can have children, although for now we drop and ignore
+         // them. This will be fixed when implement the DOM.  For now return true.
+      }
+
+      @Override
+      public String toString()
+      {
+         return "empty";
+      }
+
+   }
+
+
+   private static class  PseudoClassNot  implements PseudoClass
+   {
+      private List<Selector>  selectorGroup;
+
+      PseudoClassNot(List<Selector> selectorGroup)
+      {
+         this.selectorGroup = selectorGroup;
+      }
+
+      @Override
+      public boolean matches(RuleMatchContext ruleMatchContext, SvgElementBase obj)
+      {
+         // If this element matches any of the selectors in the simpleSelectors group
+         // provided to not, then :not fails to match.
+         for (Selector selector: selectorGroup) {
+            if (ruleMatch(ruleMatchContext, selector, obj))
+               return false;
+         }
+         return true;
+      }
+
+      int getSpecificity()
+      {
+         // The specificity of :not is the kighest specificity of the selectors in its simpleSelectors parameter list
+         int highest = Integer.MIN_VALUE;
+         for (Selector selector: selectorGroup) {
+            if (selector.specificity > highest)
+               highest = selector.specificity;
+         }
+         return highest;
+      }
+
+      @Override
+      public String toString()
+      {
+         return "not(" + selectorGroup + ")";
+      }
+
+   }
+
+
+   private static class  PseudoClassTarget  implements PseudoClass
+   {
+      @Override
+      public boolean matches(RuleMatchContext ruleMatchContext, SvgElementBase obj)
+      {
+         if (ruleMatchContext != null)
+            return obj == ruleMatchContext.targetElement;
+         else
+            return false;
+      }
+
+      @Override
+      public String toString()
+      {
+         return "target";
+      }
+
+   }
+
+
+   private static class  PseudoClassNotSupported  implements PseudoClass
+   {
+      private String  clazz;
+
+      PseudoClassNotSupported(String clazz)
+      {
+         this.clazz = clazz;
+      }
+
+      @Override
+      public boolean matches(RuleMatchContext ruleMatchContext, SvgElementBase obj)
+      {
+         return false;
+      }
+
+      @Override
+      public String toString()
+      {
+         return clazz;
+      }
+
    }
 
 

@@ -11,6 +11,8 @@ import android_svg_code_render.OutputBuilder;
  */
 public class Paint extends AndroidClass {
     public static final int ANTI_ALIAS_FLAG = 1;
+    public static final int FILTER_BITMAP_FLAG = 2;
+
     public static final int DEV_KERN_TEXT_FLAG = 2;
     public static final int SUBPIXEL_TEXT_FLAG = 4;
     private static final int[] FLAG_VALUES = {ANTI_ALIAS_FLAG, DEV_KERN_TEXT_FLAG, SUBPIXEL_TEXT_FLAG};
@@ -18,6 +20,11 @@ public class Paint extends AndroidClass {
 
     private float mTextSize;
     private Shader mShader;
+
+    public Paint(int flags) {
+        String flagString = OutputBuilder.splitFlags(flags, "Paint.", FLAG_VALUES, FLAG_NAMES);
+        init("%s", flagString);
+    }
 
     public Paint(Paint paint) {
         setParent(paint);
@@ -136,6 +143,18 @@ public class Paint extends AndroidClass {
         }
 
         return super.getInstanceName(referringClass);
+    }
+
+    public void setColorFilter(ColorFilter filter) {
+        OutputBuilder.appendMethodCall(this, "setColorFilter", "%s", filter.getInstanceName(this));
+    }
+
+    public void setXfermode(Xfermode xfermode) {
+        OutputBuilder.appendMethodCall(this, "setXfermode", "%s", xfermode.getInstanceName(this));
+    }
+
+    public void setAlpha(int alpha) {
+        OutputBuilder.appendMethodCall(this, "setAlpha", "%d", alpha);
     }
 
     public enum Style {STROKE, FILL}

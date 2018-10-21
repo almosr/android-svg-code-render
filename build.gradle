@@ -20,6 +20,11 @@ repositories {
     mavenCentral()
 }
 
+dependencies {
+    implementation 'xmlpull:xmlpull:1.1.2.1'
+    implementation 'net.sf.kxml:kxml2:2.3.0'
+}
+
 allprojects {
     sourceCompatibility = 1.8
     targetCompatibility = 1.8

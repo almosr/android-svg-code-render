@@ -18,6 +18,9 @@ package com.caverock.androidsvg;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.nio.charset.Charset;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -40,6 +43,7 @@ public class SimpleAssetResolver extends SVGExternalFileResolver
    private AssetManager  assetManager;
    
 
+   @SuppressWarnings({"WeakerAccess", "unused"})
    public SimpleAssetResolver(AssetManager assetManager)
    {
       super();
@@ -47,10 +51,10 @@ public class SimpleAssetResolver extends SVGExternalFileResolver
    }
 
 
-   private static final Set<String>  supportedFormats = new HashSet<String>(8);
+   private static final Set<String>  supportedFormats = new HashSet<>(8);
 
    // Static initialiser
-   {
+   static {
       // PNG, JPEG and SVG are required by the SVG 1.2 spec
       supportedFormats.add("image/svg+xml");
       supportedFormats.add("image/jpeg");
@@ -72,7 +76,7 @@ public class SimpleAssetResolver extends SVGExternalFileResolver
     * For the font name "Foo", first the file "Foo.ttf" will be tried and if that fails, "Foo.otf".
     */
    @Override
-   public Typeface resolveFont(String fontFamily, int fontWeight, String fontStyle)
+   public Typeface  resolveFont(String fontFamily, int fontWeight, String fontStyle)
    {
       Log.i(TAG, "resolveFont("+fontFamily+","+fontWeight+","+fontStyle+")");
 
@@ -81,14 +85,14 @@ public class SimpleAssetResolver extends SVGExternalFileResolver
       {
          return Typeface.createFromAsset(assetManager, fontFamily + ".ttf");
       }
-      catch (Exception e) {}
+      catch (RuntimeException ignored) {}
 
       // That failed, so try ".otf"
       try
       {
          return Typeface.createFromAsset(assetManager, fontFamily + ".otf");
       }
-      catch (Exception e)
+      catch (RuntimeException e)
       {
          return null;
       }
@@ -96,10 +100,10 @@ public class SimpleAssetResolver extends SVGExternalFileResolver
 
 
    /**
-    * Attempt to find the specified image file in the "assets" folder and return a decoded Bitmap.
+    * Attempt to find the specified image file in the <code>assets</code> folder and return a decoded Bitmap.
     */
    @Override
-   public Bitmap resolveImage(String filename)
+   public Bitmap  resolveImage(String filename)
    {
       Log.i(TAG, "resolveImage("+filename+")");
 
@@ -120,9 +124,56 @@ public class SimpleAssetResolver extends SVGExternalFileResolver
     * other bitmap image formats supported by Android's BitmapFactory class.
     */
    @Override
-   public boolean isFormatSupported(String mimeType)
+   public boolean  isFormatSupported(String mimeType)
    {
       return supportedFormats.contains(mimeType);
+   }
+
+
+   /**
+    * Attempt to find the specified stylesheet file in the "assets" folder and return its string contents.
+    * @since 1.3
+    */
+   @Override
+   public String  resolveCSSStyleSheet(String url)
+   {
+      Log.i(TAG, "resolveCSSStyleSheet("+url+")");
+      return getAssetAsString(url);
+   }
+
+
+   /*
+    * Read the contents of the asset whose name is given by "url" and return it as a String.
+    */
+   private String getAssetAsString(String url)
+   {
+      InputStream is = null;
+      try
+      {
+         is = assetManager.open(url);
+
+         Reader r = new InputStreamReader(is, Charset.forName("UTF-8"));
+         char[]         buffer = new char[4096];
+         StringBuilder  sb = new StringBuilder();
+         int            len = r.read(buffer);
+         while (len > 0) {
+            sb.append(buffer, 0, len);
+            len = r.read(buffer);
+         }
+         return sb.toString();
+      }
+      catch (IOException e)
+      {
+         return null;
+      }
+      finally {
+         try {
+            if (is != null)
+               is.close();
+         } catch (IOException e) {
+           // Do nothing
+         }
+      }
    }
 
 }

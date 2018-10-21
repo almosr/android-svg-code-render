@@ -95,6 +95,10 @@ public class OutputBuilder {
         return Arrays.toString(outputList).replace(",", " |").replace("[", "").replace("]", "");
     }
 
+    public static String dumpArray(float[] array) {
+        return Arrays.toString(array);
+    }
+
     public static void appendConstant(AndroidClass constant, String line) {
         sStaticItems.add(new OutputItem(constant, line));
     }
