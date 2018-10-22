@@ -14,8 +14,6 @@ import android_svg_code_render.TextReplacements;
 public class Canvas extends AndroidClass {
     public static final int MATRIX_SAVE_FLAG = 1;
     public static final int ALL_SAVE_FLAG = 31;
-    private static final int[] FLAG_VALUES = {MATRIX_SAVE_FLAG, ALL_SAVE_FLAG};
-    private static final String[] FLAG_NAMES = {"MATRIX_SAVE_FLAG", "ALL_SAVE_FLAG"};
 
     private static final String TAG = Canvas.class.getName();
     private final int mWidth;
@@ -99,7 +97,8 @@ public class Canvas extends AndroidClass {
             throw new RuntimeException("RectF instances in generated code is not supported");
         }
 
-        OutputBuilder.appendMethodCall(this, "saveLayerAlpha", "null, %d, %s", alpha, OutputBuilder.splitFlags(saveFlags, "Canvas.", FLAG_VALUES, FLAG_NAMES));
+        //Only ALL_SAVE_FLAG is available from Android P
+        OutputBuilder.appendMethodCall(this, "saveLayerAlpha", "null, %d, %s", alpha, "Canvas.ALL_SAVE_FLAG");
     }
 
     public void drawBitmap(Bitmap maskedContent, float left, float top, Paint paint) {
@@ -131,7 +130,8 @@ public class Canvas extends AndroidClass {
     }
 
     public void save(int saveFlags) {
-        OutputBuilder.appendMethodCall(this, "save", "%s", OutputBuilder.splitFlags(saveFlags, "Canvas.", FLAG_VALUES, FLAG_NAMES));
+        //As of Android P save takes no parameters
+        OutputBuilder.appendMethodCall(this, "save");
     }
 
     public void scale(float width, float height) {
@@ -149,8 +149,9 @@ public class Canvas extends AndroidClass {
             throw new RuntimeException("Canvas.saveLayer() with non-null bounds is not supported");
         }
 
+        //Only ALL_SAVE_FLAG is available from Android P
         OutputBuilder.appendMethodCall(this, "saveLayer", "null, %s, %s",
                 paint.getInstanceName(this),
-                OutputBuilder.splitFlags(saveFlags, "Canvas.", FLAG_VALUES, FLAG_NAMES));
+                "Canvas.ALL_SAVE_FLAG");
     }
 }

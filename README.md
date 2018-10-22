@@ -129,6 +129,8 @@ The tool is not compatible with all SVG files, certain features are not supporte
 Obviously certain SVG features, like interactivity is out of scope for this tool, also there might be difficulties with some SVG formats saved from certain programs.
 For some details please see Unresolved issues below.
 
+Generated code is aiming to be compatible with all Android versions from Kitkat (v19) and above, but it is fine-tuned to be fully compatible with Android Pie (v28).
+
 ## Unresolved issues
 
 There are some issues which needed to be addressed sooner or later:

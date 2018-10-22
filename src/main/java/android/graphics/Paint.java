@@ -22,7 +22,7 @@ public class Paint extends AndroidClass {
     private Shader mShader;
 
     public Paint(int flags) {
-        String flagString = OutputBuilder.splitFlags(flags, "Paint.", FLAG_VALUES, FLAG_NAMES);
+        String flagString = OutputBuilder.splitFlags(flags, "Paint.", FLAG_VALUES, FLAG_NAMES, true);
         init("%s", flagString);
     }
 
@@ -36,7 +36,7 @@ public class Paint extends AndroidClass {
 
     public void setFlags(int flags) {
         checkInheritance();
-        String flagString = OutputBuilder.splitFlags(flags, "Paint.", FLAG_VALUES, FLAG_NAMES);
+        String flagString = OutputBuilder.splitFlags(flags, "Paint.", FLAG_VALUES, FLAG_NAMES, true);
         OutputBuilder.appendMethodCall(this, "setFlags", "%s", flagString);
     }
 

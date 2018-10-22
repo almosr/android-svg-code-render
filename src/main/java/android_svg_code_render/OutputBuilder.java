@@ -77,9 +77,19 @@ public class OutputBuilder {
         append(instance, String.format("%s.%s(%s);", instance.getInstanceName(null), methodName, String.format(parameters, objects)));
     }
 
-    public static String splitFlags(int flags, String prefix, int[] values, String[] names) {
+    public static String splitFlags(int flags, String prefix, int[] values, String[] names, boolean zeroDefault) {
         if (flags == 0) {
-            return "0";
+            if (zeroDefault) {
+                return "0";
+            }
+
+            for (int i = 0; i < values.length; i++) {
+                if (values[i] == 0) {
+                    return prefix + names[i];
+                }
+            }
+
+            throw new RuntimeException("Zero default was not enabled for flags where zero value was not mapped to a value");
         }
 
         ArrayList<String> flagList = new ArrayList<>();
