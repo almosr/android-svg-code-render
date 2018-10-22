@@ -15,7 +15,6 @@ version '1.5.0'
 apply plugin: 'java'
 apply plugin: 'idea'
 
-
 repositories {
     mavenCentral()
 }
@@ -33,6 +32,10 @@ allprojects {
 jar {
     manifest {
         attributes 'Main-Class': 'android_svg_code_render.Main'
+    }
+    from {
+        //Also copy dependencies into the JAR
+        configurations.compileClasspath.collect { it.isDirectory() ? it : zipTree(it) }
     }
 }
 
