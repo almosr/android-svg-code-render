@@ -123,6 +123,12 @@ As it seems the generated code increases the size of the APK file more than the 
 
 Since the files are converted into Java code, all files are contributing into the infamous Dex file method count ([see 64k reference limit](https://developer.android.com/studio/build/multidex.html)). Usually one SVG will be turned into a few methods only (due to the required method chaining it cannot be solved in one method only usually), so it is not a big deal, but if you had lots of files then it can make the situation worse for your code base.
 
+## Compatibility
+
+The tool is not compatible with all SVG files, certain features are not supported.
+Obviously certain SVG features, like interactivity is out of scope for this tool, also there might be difficulties with some SVG formats saved from certain programs.
+For some details please see Unresolved issues below.
+
 ## Unresolved issues
 
 There are some issues which needed to be addressed sooner or later:
