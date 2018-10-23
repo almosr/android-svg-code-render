@@ -30,13 +30,6 @@ public class Canvas extends AndroidClass {
         mRoot = isRoot;
     }
 
-    public Canvas(Bitmap bitmap) {
-        mWidth = bitmap.getWidth();
-        mHeight = bitmap.getHeight();
-
-        init("%s", bitmap.getInstanceName(this));
-    }
-
     public int getWidth() {
         return mWidth;
     }
