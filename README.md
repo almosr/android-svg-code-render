@@ -131,6 +131,8 @@ Obviously certain SVG features, like interactivity is out of scope for this tool
 For some details please see Unresolved issues below.
 
 Generated code is aiming to be compatible with the minimum Android API version and any later version. See minimum Android API version setting.
+Minimum Android API version is also reported to androidsvg and used to get the output optimized by making use of the new features available in the specified Android OS version.
+
 Not all Android graphical methods are hardware accelerated on all Android versions.
 A warning is printed to the standard output when the rendered code contains OS method calls which are not hardware accelerated on the specified minimum API version.
 For more information see the [official documentation](https://developer.android.com/guide/topics/graphics/hardware-accel) .

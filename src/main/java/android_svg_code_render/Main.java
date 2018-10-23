@@ -61,6 +61,9 @@ public class Main {
 
         extractParameters(args);
 
+        //Set the simulated Android SDK to the selected minimum
+        AndroidVersionSimulation.SDK_INT = sMinimumAndroidAPI;
+
         try {
             render(sInputFileName);
         } catch (IOException | SVGParseException | RuntimeException e) {
