@@ -2,6 +2,7 @@ package android.graphics;
 
 import android_svg_code_render.AndroidClass;
 import android_svg_code_render.ColorReplacements;
+import android_svg_code_render.Main;
 import android_svg_code_render.OutputBuilder;
 
 /**
@@ -81,6 +82,8 @@ public class Paint extends AndroidClass {
     }
 
     public void setStrokeCap(Cap strokeCap) {
+        Main.checkAPIWarning("Paint.setStrokeCap for lines", 18);
+        Main.checkAPIWarning("Paint.setStrokeCap for points", 19);
         checkInheritance();
         OutputBuilder.appendMethodCall(this, "setStrokeCap", "Paint.Cap.%s", strokeCap.name());
     }
@@ -96,6 +99,7 @@ public class Paint extends AndroidClass {
     }
 
     public void setPathEffect(PathEffect pathEffect) {
+        Main.checkAPIWarning("Paint.setPathEffect", 28);
         checkInheritance();
         if (pathEffect != null) {
             OutputBuilder.addImport(pathEffect.getClass());

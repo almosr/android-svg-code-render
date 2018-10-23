@@ -9,6 +9,8 @@ import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.Locale;
 
 /**
@@ -18,6 +20,8 @@ import java.util.Locale;
  */
 public class Main {
     private static final String CANVAS_PARAMETER_NAME = "canvas";
+
+    private static final int[] ANDROID_API_VERSIONS = {14, 15, 16, 17, 18, 19, 21, 22, 23, 24, 25, 26, 27, 28};
 
     private static final String FILE_TEMPLATE =
             "package %s;\n\n" +                       //Package name
@@ -45,6 +49,8 @@ public class Main {
     private static String sPackageName;
     private static String sClassName;
     private static String sTemplate;
+    private static int sMinimumAndroidAPI = ANDROID_API_VERSIONS[0];
+    private static HashSet<String> sAPIWarnings = new HashSet<>();
 
     public static void main(String[] args) {
 
@@ -66,6 +72,24 @@ public class Main {
         } catch (FileNotFoundException e) {
             error(e, "Error while saving result");
         }
+
+        if (sAPIWarnings.size() > 0) {
+            System.out.println(String.format("WARNING: hardware accelerated rendering is not available on specified minimum Android API v%d", sMinimumAndroidAPI));
+            System.out.println("The following methods are used in rendered source code:");
+            for (String method : sAPIWarnings) {
+                System.out.println(method);
+            }
+        }
+    }
+
+    public static void checkAPIWarning(String method, int supportedAPI) {
+        if (isLowerMinimumAPI(supportedAPI)) {
+            sAPIWarnings.add(method);
+        }
+    }
+
+    public static boolean isLowerMinimumAPI(int api) {
+        return api > sMinimumAndroidAPI;
     }
 
     private static void extractParameters(String[] args) {
@@ -128,6 +152,18 @@ public class Main {
                         ConfigFileUtils.readColorReplacementConfig(args[i + 1]);
                     } catch (Exception e) {
                         throw new RuntimeException("Error while parsing replacement color parameter", e);
+                    }
+                    break;
+
+                case "-aos":
+                    try {
+                        int api = Integer.parseInt(args[i + 1]);
+                        if (Arrays.stream(ANDROID_API_VERSIONS).noneMatch(x -> x == api)) {
+                            throw new RuntimeException(String.format("Unknown Android API version: %d, supported versions: %s", api, Arrays.toString(ANDROID_API_VERSIONS)));
+                        }
+                        sMinimumAndroidAPI = api;
+                    } catch (Exception e) {
+                        throw new RuntimeException("Error while parsing minimum Android API version parameter", e);
                     }
                     break;
 

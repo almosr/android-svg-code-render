@@ -20,6 +20,7 @@ java -jar android-svg-code-render <inputfile.svg> [-p <package name>] [-c <class
 
 Arguments for the executable are:
 * **inputfile.svg** (required) - SVG formatted input file path/name (compressed files are not supported at the moment)
+* **-aos &lt;api version&gt;** (optional) - minimum Android API version for rendered code
 * **-p &lt;package name&gt;** (optional) - package name in the output file (default: "vector_render")
 * **-c &lt;class name&gt;** (optional) - name of the embedding class for the render method (default: "VectorRender")
 * **-o &lt;outputfile.java&gt;** (optional) - output file path/name (default: "VectorRender_*inputfilename*")
@@ -129,7 +130,10 @@ The tool is not compatible with all SVG files, certain features are not supporte
 Obviously certain SVG features, like interactivity is out of scope for this tool, also there might be difficulties with some SVG formats saved from certain programs.
 For some details please see Unresolved issues below.
 
-Generated code is aiming to be compatible with all Android versions from Kitkat (v19) and above, but it is fine-tuned to be fully compatible with Android Pie (v28).
+Generated code is aiming to be compatible with the minimum Android API version and any later version. See minimum Android API version setting.
+Not all Android graphical methods are hardware accelerated on all Android versions.
+A warning is printed to the standard output when the rendered code contains OS method calls which are not hardware accelerated on the specified minimum API version.
+For more information see the [official documentation](https://developer.android.com/guide/topics/graphics/hardware-accel) .
 
 ## Unresolved issues
 

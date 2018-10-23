@@ -1,10 +1,7 @@
 package android.graphics;
 
 import android.util.Log;
-import android_svg_code_render.AndroidClass;
-import android_svg_code_render.ColorReplacements;
-import android_svg_code_render.OutputBuilder;
-import android_svg_code_render.TextReplacements;
+import android_svg_code_render.*;
 
 /**
  * Simulated Android Canvas class
@@ -105,12 +102,14 @@ public class Canvas extends AndroidClass {
     }
 
     public void drawTextOnPath(String text, Path path, float x, float y, Paint paint) {
+        Main.checkAPIWarning("Canvas.drawTextOnPath", 16);
         if (!text.isEmpty()) {
             OutputBuilder.appendMethodCall(this, "drawTextOnPath", "%s, %s, %ff, %ff, %s", TextReplacements.findTextReplacement(text), path.getInstanceName(this), x, y, paint.getInstanceName(this));
         }
     }
 
     public void clipRect(float left, float top, float right, float bottom) {
+        Main.checkAPIWarning("Canvas.clipRect with rotation/perspective", 16);
         OutputBuilder.appendMethodCall(this, "clipRect", "%ff, %ff, %ff, %ff", left, top, right, bottom);
     }
 
@@ -119,6 +118,7 @@ public class Canvas extends AndroidClass {
     }
 
     public void clipPath(Path clipPath) {
+        Main.checkAPIWarning("Canvas.clipPath", 18);
         OutputBuilder.appendMethodCall(this, "clipPath", "%s", clipPath.getInstanceName(this));
     }
 
