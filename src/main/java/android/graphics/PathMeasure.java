@@ -5,6 +5,7 @@ package android.graphics;
  */
 public class PathMeasure {
     public PathMeasure(Path path, boolean b) {
+        //TODO: Path measure is not supported yet
     }
 
     public float getLength() {
