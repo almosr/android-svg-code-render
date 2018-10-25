@@ -215,7 +215,7 @@ public class Main {
 
     private static void printHelp() {
         System.out.println(String.format("android-svg-code-render v%s (%s)", Version.FULL, new SimpleDateFormat("dd/MM/yyyy HH:mm").format(Version.BUILD_TIME)));
-        System.out.println("Usage: android-svg-code-render <inputfile.svg> [-p <package name>] [-c <class name>] [-o <outputfile.java>] [-t <template file>] [-tfp <typeface parameter name>] [-rt <text replacement file>] [-rc <color replacement file>]\n");
+        System.out.println("Usage: android-svg-code-render <inputfile.svg> [-p <package name>] [-c <class name>] [-o <outputfile.java>] [-t <template file>] [-tfp <typeface parameter name>] [-rt <text replacement file>] [-rc <color replacement file>] [-aos <Android API version>]\n");
     }
 
     private static void error(String msg, Object... params) {
