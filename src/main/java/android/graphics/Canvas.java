@@ -1,5 +1,6 @@
 package android.graphics;
 
+import android.os.Build;
 import android.util.Log;
 import android_svg_code_render.*;
 
@@ -87,8 +88,14 @@ public class Canvas extends AndroidClass {
             throw new RuntimeException("RectF instances in generated code is not supported");
         }
 
-        //Only ALL_SAVE_FLAG is available from Android P
-        OutputBuilder.appendMethodCall(this, "saveLayerAlpha", "null, %d, %s", alpha, "Canvas.ALL_SAVE_FLAG");
+        if (Build.VERSION.SDK_INT >= 21) {
+            //From Lollipop we can use the flag-less version of the method
+            OutputBuilder.appendMethodCall(this, "saveLayerAlpha", "null, %d", alpha);
+        } else {
+            //Only ALL_SAVE_FLAG is available from Android P, all other flags were deprecated,
+            //so flags will be ignored and substituted with Canvas.ALL_SAVE_FLAG
+            OutputBuilder.appendMethodCall(this, "saveLayerAlpha", "null, %d, %s", alpha, "Canvas.ALL_SAVE_FLAG");
+        }
     }
 
     public void drawBitmap(Bitmap maskedContent, float left, float top, Paint paint) {
