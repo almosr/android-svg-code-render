@@ -20,7 +20,7 @@ java -jar android-svg-code-render <inputfile.svg> [-p <package name>] [-c <class
 
 Arguments for the executable are:
 * **inputfile.svg** (required) - SVG formatted input file path/name (compressed files are not supported at the moment)
-* **-aos &lt;api version&gt;** (optional) - minimum Android API version for rendered code
+* **-aos &lt;api version&gt;** (optional) - minimum Android API version for rendered code (default: 14)
 * **-p &lt;package name&gt;** (optional) - package name in the output file (default: "vector_render")
 * **-c &lt;class name&gt;** (optional) - name of the embedding class for the render method (default: "VectorRender")
 * **-o &lt;outputfile.java&gt;** (optional) - output file path/name (default: "VectorRender_*inputfilename*")
