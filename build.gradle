@@ -10,7 +10,7 @@ plugins {
 }
 
 group 'android_svg_code_render'
-version '1.5.0'
+version '1.6.0'
 
 apply plugin: 'java'
 apply plugin: 'idea'
