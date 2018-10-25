@@ -1,0 +1,50 @@
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+}
+
+plugins {
+    //Gradle plugin to generate buildconfig class
+    id 'de.fuerstenau.buildconfig' version '1.1.8'
+}
+
+group 'android_svg_code_render'
+version '1.5.0'
+
+apply plugin: 'java'
+apply plugin: 'idea'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation 'xmlpull:xmlpull:1.1.2.1'
+    implementation 'net.sf.kxml:kxml2:2.3.0'
+}
+
+allprojects {
+    sourceCompatibility = 1.8
+    targetCompatibility = 1.8
+}
+
+jar {
+    manifest {
+        attributes 'Main-Class': 'android_svg_code_render.Main'
+    }
+    from {
+        //Also copy dependencies into the JAR
+        configurations.compileClasspath.collect { it.isDirectory() ? it : zipTree(it) }
+    }
+}
+
+idea {
+    project {
+        languageLevel = sourceCompatibility
+    }
+
+    module {
+        excludeDirs -= file("$buildDir")
+    }
+}
